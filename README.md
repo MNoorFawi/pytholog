@@ -78,3 +78,5 @@ pl_query(pl_expr("food_flavor(gouda, sweet)"), new_kb)
 #[]
 ```
 
+###### P.S. I wanted to build the whole library from scratch without searching for help or hints. But actually I couldn't :D. I got stuck in the query function, I was using stack structure for backtracking but something was going wrong. all domains were inheriting the output from unify function which led to infinite number of variables. Until I decided to search and after opening lots of links I found a useful trick here http://www.openbookproject.net/py4fun/prolog/intro.html. The deepcopy trick of the target domain to keep it independent solved everything. so I used the trick in the query function and modified the unify function.
+
