@@ -61,7 +61,11 @@ class pl_fact:
     def __repr__ (self) :
         return self.fact
         
-def unify(lh, rh, lh_domain, rh_domain):
+def unify(lh, rh, lh_domain = None, rh_domain = None):
+    if rh_domain == None:
+        rh_domai = dict(zip(rh.args, rh.args))
+    if lh_domain == None:
+        lh_domain = {}
     nargs = len(rh.args)
     if nargs != len(lh.args): 
         return False
