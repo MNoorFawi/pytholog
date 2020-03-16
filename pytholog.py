@@ -1,5 +1,6 @@
 import re, copy
 from collections import deque 
+from functools import lru_cache
 
 class pl_expr:
     def __init__ (self, fact, prob = None) :
@@ -25,22 +26,22 @@ class pl_expr:
     def __repr__ (self) :
         return self.string
         
-class pl_rule:
-    def __init__ (self, rule, probs = None):
-        self._parse_rule(rule, probs)
+class pl_fact:
+    def __init__ (self, fact, probs = None):
+        self._parse_fact(fact, probs)
         
-    def _parse_rule(self, rule, probs):
-        rule = rule.replace(" ", "")
+    def _parse_fact(self, fact, probs):
+        fact = fact.replace(" ", "")
         if probs: prob_pred = probs[0]
         else: prob_pred = None
-        if ":-" in rule:
-            if_ind = rule.index(":-")
-            self.predicate = pl_expr(rule[:if_ind], prob_pred)
+        if ":-" in fact:
+            if_ind = fact.index(":-")
+            self.predicate = pl_expr(fact[:if_ind], prob_pred)
         
             replacements = {"),": ")AND", ");": ")OR"}
             replacements = dict((re.escape(k), v) for k, v in replacements.items()) 
             pattern = re.compile("|".join(replacements.keys()))
-            rh = pattern.sub(lambda x: replacements[re.escape(x.group(0))], rule[if_ind + 2:])
+            rh = pattern.sub(lambda x: replacements[re.escape(x.group(0))], fact[if_ind + 2:])
             rh = re.split("AND|OR", rh)
             if probs and len(probs) > 1:
                 self.rhs = [pl_expr(g, p) for g, p in zip(rh, probs[1:])]
@@ -48,17 +49,17 @@ class pl_rule:
                 self.rhs = [pl_expr(g) for g in rh]
         
             rs = [i.to_string() for i in self.rhs]
-            self.rule = (self.predicate.to_string() + ":-" + ",".join(rs))
+            self.fact = (self.predicate.to_string() + ":-" + ",".join(rs))
         else:
-            self.predicate = pl_expr(rule, prob_pred)
+            self.predicate = pl_expr(fact, prob_pred)
             self.rhs = []
-            self.rule = self.predicate.to_string()
+            self.fact = self.predicate.to_string()
 
     def to_string(self):
-        return self.rule
+        return self.fact
 
     def __repr__ (self) :
-        return self.rule
+        return self.fact
         
 def unify(lh, rh, lh_domain, rh_domain):
     nargs = len(rh.args)
@@ -95,7 +96,7 @@ class knowledge_base(object):
     def add_kn(self, kn):
         #kns = tuple(kn)
         for i in kn:
-            self.db.append(pl_rule(i))
+            self.db.append(pl_fact(i))
             
     def __call__(self, args):
         self.add_kn(args)
@@ -107,36 +108,37 @@ class knowledge_base(object):
     
 class target: 
     _id = 0
-    def __init__(self, rule, supertarget = None, domain = {}):
+    def __init__(self, fact, supertarget = None, domain = {}):
         self.id = target._id
         target._id += 1
-        self.rule = rule
+        self.fact = fact
         self.supertarget = supertarget
         self.domain = copy.deepcopy(domain) # to keep every target domain independent
         self.dir = 0      # start search with 1st subtarget
 
     def __repr__ (self) :
-        return "rule=%s\ngoals=%s\ndomain=%s" % (self.rule, self.rule.rhs, self.domain)
+        return "fact=%s\ngoals=%s\ndomain=%s" % (self.fact, self.fact.rhs, self.domain)
         
 def find_indices(lst, condition):
     return [i for i, elem in enumerate(lst) if condition(elem)]
 
+@lru_cache(maxsize = None)
 def pl_query(pl_expr, kb):
     #var = find_indices(pl_expr.args, lambda e: e <= "Z")
     answer = []
-    tgt = target(pl_rule("start(search):-from(random)"))      # start randomly
-    tgt.rule.rhs = [pl_expr]                  
+    tgt = target(pl_fact("start(search):-from(random)"))      # start randomly
+    tgt.fact.rhs = [pl_expr]                  
     stack = deque([tgt])                            # Start our search
     while stack:
         nxt_tgt = stack.pop()        # Next target to consider
-        if nxt_tgt.dir >= len(nxt_tgt.rule.rhs) :       # finished?
+        if nxt_tgt.dir >= len(nxt_tgt.fact.rhs) :       # finished?
             if nxt_tgt.supertarget == None :             
                 if nxt_tgt.domain: answer.append(nxt_tgt.domain)
                 else: answer.append("Yes")        # have a solution or yes
                 continue
             supertgt = copy.deepcopy(nxt_tgt.supertarget)  # go one step above in the tree
-            unify(supertgt.rule.rhs[supertgt.dir],
-                  nxt_tgt.rule.predicate,
+            unify(supertgt.fact.rhs[supertgt.dir],
+                  nxt_tgt.fact.predicate,
                   supertgt.domain,
                   nxt_tgt.domain)
             supertgt.dir += 1         # next goal
@@ -144,7 +146,7 @@ def pl_query(pl_expr, kb):
             continue
 
         # unify in the database
-        pl_expr = nxt_tgt.rule.rhs[nxt_tgt.dir]            
+        pl_expr = nxt_tgt.fact.rhs[nxt_tgt.dir]            
         for kn in kb.db:                     
             if kn.predicate.predicate != pl_expr.predicate: continue
             if len(kn.predicate.args) != len(pl_expr.args): continue
