@@ -63,7 +63,7 @@ class pl_fact:
         
 def unify(lh, rh, lh_domain = None, rh_domain = None):
     if rh_domain == None:
-        rh_domai = dict(zip(rh.args, rh.args))
+        rh_domain = {} #dict(zip(rh.args, rh.args))
     if lh_domain == None:
         lh_domain = {}
     nargs = len(rh.args)
