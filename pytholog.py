@@ -1,6 +1,8 @@
-import re, copy
-from collections import deque 
-from functools import lru_cache
+import re
+#from collections import deque 
+from functools import wraps #, lru_cache
+from itertools import chain
+from more_itertools import unique_everseen
 
 class pl_expr:
     def __init__ (self, fact, prob = None) :
@@ -11,12 +13,12 @@ class pl_expr:
         self.f = fact
         pred_ind = fact.index("(")
         self.predicate = fact[:pred_ind]
-        self.args = fact[pred_ind:]
+        self.terms = fact[pred_ind:]
         to_remove = str.maketrans("", "", "() ")
-        self.args = self.args.translate(to_remove).split(",")
+        self.terms = self.terms.translate(to_remove).split(",")
         self.prob = prob
         if self.prob:
-            self.string = "%s(%s,%.2f)." % (self.predicate, ",".join(self.args), prob)
+            self.string = "%s(%s,%.2f)." % (self.predicate, ",".join(self.terms), prob)
         else:
             self.string = self.f
         
@@ -32,11 +34,12 @@ class pl_fact:
         
     def _parse_fact(self, fact, probs):
         fact = fact.replace(" ", "")
+        self.terms = self.rule_terms(fact)
         if probs: prob_pred = probs[0]
         else: prob_pred = None
-        if ":-" in fact:
+        if ":-" in fact: 
             if_ind = fact.index(":-")
-            self.predicate = pl_expr(fact[:if_ind], prob_pred)
+            self.lh = pl_expr(fact[:if_ind], prob_pred)
         
             replacements = {"),": ")AND", ");": ")OR"}
             replacements = dict((re.escape(k), v) for k, v in replacements.items()) 
@@ -49,11 +52,18 @@ class pl_fact:
                 self.rhs = [pl_expr(g) for g in rh]
         
             rs = [i.to_string() for i in self.rhs]
-            self.fact = (self.predicate.to_string() + ":-" + ",".join(rs))
+            self.fact = (self.lh.to_string() + ":-" + ",".join(rs))
         else:
-            self.predicate = pl_expr(fact, prob_pred)
+            self.lh = pl_expr(fact, prob_pred)
             self.rhs = []
-            self.fact = self.predicate.to_string()
+            self.fact = self.lh.to_string()
+            
+    def rule_terms(self, rule_string):
+        s = re.sub(" ", "", rule_string)
+        s = re.findall('\((.*?)\)', s)
+        s = [i.split(",") for i in s]
+        s = list(chain(*s))
+        return list(unique_everseen(s))
 
     def to_string(self):
         return self.fact
@@ -63,17 +73,17 @@ class pl_fact:
         
 def unify(lh, rh, lh_domain = None, rh_domain = None):
     if rh_domain == None:
-        rh_domain = {} #dict(zip(rh.args, rh.args))
+        rh_domain = {} #dict(zip(rh.terms, rh.terms))
     if lh_domain == None:
         lh_domain = {}
-    nargs = len(rh.args)
-    if nargs != len(lh.args): 
+    nterms = len(rh.terms)
+    if nterms != len(lh.terms): 
         return False
     if rh.predicate != lh.predicate: 
         return False
-    for i in range(nargs):
-        rh_arg  = rh.args[i]
-        lh_arg = lh.args[i]
+    for i in range(nterms):
+        rh_arg  = rh.terms[i]
+        lh_arg = lh.terms[i]
         if rh_arg <= 'Z': 
             rh_val = rh_domain.get(rh_arg)
         else: rh_val = rh_arg
@@ -91,76 +101,101 @@ def unify(lh, rh, lh_domain = None, rh_domain = None):
 class knowledge_base(object):
     _id = 0
     def __init__(self, name = None):
-        self.db = []
+        self.db = {}
         if not name:
             name = "_%d" % knowledge_base._id
             knowledge_base._id += 1
         self.name = name
         
     def add_kn(self, kn):
-        #kns = tuple(kn)
         for i in kn:
-            self.db.append(pl_fact(i))
+            i = pl_fact(i)
+            if i.lh.predicate in self.db:
+                self.db[i.lh.predicate]["facts"].append(i)
+                self.db[i.lh.predicate]["goals"].append(i.rhs)
+                self.db[i.lh.predicate]["terms"].append(i.terms)
+            else: 
+                self.db[i.lh.predicate] = {}
+                self.db[i.lh.predicate]["facts"] = [i]
+                self.db[i.lh.predicate]["goals"] = [i.rhs]
+                self.db[i.lh.predicate]["terms"] = [i.terms]
             
     def __call__(self, args):
         self.add_kn(args)
-        
+            
+    
+    def term_checker(self, expr):
+        #if not isinstance(expr, pl_expr):
+        #    expr = pl_expr(expr)
+        terms = expr.terms[:]
+        indx = [x for x,y in enumerate(terms) if y <= "Z"]
+        for i in indx:
+            terms[i] = "Var" + str(i)
+        #return expr, "%s(%s)" % (expr.predicate, ",".join(terms))
+        return indx, "%s(%s)" % (expr.predicate, ",".join(terms))
+
+
+    def memory(querizer):
+        cache = {}
+        @wraps(querizer)
+        def memorize_query(self, arg1):
+            temp_cache = {}
+            #original, look_up = self.term_checker(arg1)
+            indx, look_up = self.term_checker(arg1)
+            if look_up in cache:
+                #return cache[look_up]
+                temp_cache = cache[look_up]
+            else:
+                new_entry = querizer(self, arg1)
+                cache[look_up] = new_entry
+                temp_cache = new_entry
+                #return new_entry
+            
+            for d in temp_cache:
+                if isinstance(d, dict):
+                    old = list(d.keys())
+                    #for i in range(len(arg1.terms)):
+                    for i,j in zip(indx, range(len(old))):
+                        d[arg1.terms[i]] = d.pop(old[j])     
+                            
+            return temp_cache    
+
+        return memorize_query
+
+    def querizer(query):
+        @wraps(query)
+        def prepare_query(self, arg1):
+            pred = arg1.predicate
+            if pred in self.db:
+                goals_len = 0.0
+                for i in self.db[pred]["goals"]:
+                    goals_len += len(i)
+                if goals_len == 0:
+                    return query(self, arg1)
+
+        return prepare_query    
+
+    @memory
+    @querizer    
+    def query(self, expr):
+        pred = expr.predicate
+        result = []
+
+        for i in self.db[pred]["facts"]:
+            res = {}
+            uni = unify(expr, pl_expr(i.to_string()), res)
+            if uni:
+                if len(res) == 0: result.append("Yes")
+                else: result.append(res)
+
+        if len(result) == 0: result.append("No")
+
+        return result
+
+
     def __str__(self):
         return "Knowledge Base: " + self.name
 
     __repr__ = __str__
-    
-class target: 
-    _id = 0
-    def __init__(self, fact, supertarget = None, domain = {}):
-        self.id = target._id
-        target._id += 1
-        self.fact = fact
-        self.supertarget = supertarget
-        self.domain = copy.deepcopy(domain) # to keep every target domain independent
-        self.dir = 0      # start search with 1st subtarget
-
-    def __repr__ (self) :
-        return "fact=%s\ngoals=%s\ndomain=%s" % (self.fact, self.fact.rhs, self.domain)
-        
-def find_indices(lst, condition):
-    return [i for i, elem in enumerate(lst) if condition(elem)]
-
-@lru_cache(maxsize = None)
-def pl_query(pl_expr, kb):
-    #var = find_indices(pl_expr.args, lambda e: e <= "Z")
-    answer = []
-    tgt = target(pl_fact("start(search):-from(random)"))      # start randomly
-    tgt.fact.rhs = [pl_expr]                  
-    stack = deque([tgt])                            # Start our search
-    while stack:
-        nxt_tgt = stack.pop()        # Next target to consider
-        if nxt_tgt.dir >= len(nxt_tgt.fact.rhs) :       # finished?
-            if nxt_tgt.supertarget == None :             
-                if nxt_tgt.domain: answer.append(nxt_tgt.domain)
-                else: answer.append("Yes")        # have a solution or yes
-                continue
-            supertgt = copy.deepcopy(nxt_tgt.supertarget)  # go one step above in the tree
-            unify(supertgt.fact.rhs[supertgt.dir],
-                  nxt_tgt.fact.predicate,
-                  supertgt.domain,
-                  nxt_tgt.domain)
-            supertgt.dir += 1         # next goal
-            stack.append(supertgt)          
-            continue
-
-        # unify in the database
-        pl_expr = nxt_tgt.fact.rhs[nxt_tgt.dir]            
-        for kn in kb.db:                     
-            if kn.predicate.predicate != pl_expr.predicate: continue
-            if len(kn.predicate.args) != len(pl_expr.args): continue
-            subtarget = target(kn, nxt_tgt)               # A possible subtarget
-            ans = unify(kn.predicate, pl_expr, 
-                        subtarget.domain,
-                        nxt_tgt.domain)
-            if ans:                            # if unifies, stack it up
-                stack.append(subtarget)
-        
-    return answer
     
     
