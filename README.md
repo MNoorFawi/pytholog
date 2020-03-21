@@ -107,5 +107,3 @@ pl_query(pl_expr("dish_to_like(noor, What)"), new_kb)
 #[{'What': 'sausage'}, {'What': 'steak'}, {'What': 'gouda'}]
 ```
 
-###### P.S. I wanted to build the whole library from scratch without searching for help or hints. But actually I couldn't :D. I got stuck in the query function, I was using stack structure for backtracking but something was going wrong. all new target domains were getting the same output from previous unify function because of "=" assignment, which led to infinite number of variables. Until I decided to search and after opening lots of links I found a useful trick [here](http://www.openbookproject.net/py4fun/prolog/intro.html). The deepcopy trick of the target domain to keep it independent solved everything. so I used the trick in the query function and modified the unify function.
-
