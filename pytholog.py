@@ -80,7 +80,7 @@ class goal :
         self.ind = 0 
 
     def __repr__ (self) :
-        return "Goal = %s, index = %d, domain = %s, parent = %s" % (self.fact,self.ind,self.domain, self.parent)
+        return "Goal = %s, parent = %s" % (self.fact, self.parent)
         
 def unify(lh, rh, lh_domain = None, rh_domain = None):
     if rh_domain == None:
