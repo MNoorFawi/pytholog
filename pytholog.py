@@ -7,7 +7,7 @@ from more_itertools import unique_everseen
 from heapq import heappush, heappop
 
 class pl_expr:
-    def __init__ (self, fact, prob = None) :
+    def __init__ (self, fact, prob = None) :  ## putting probabilities placeholders for future implementation.
         self._parse_expr(fact, prob)
             
     def _parse_expr(self, fact, prob):
@@ -23,7 +23,8 @@ class pl_expr:
             self.string = "%s(%s,%.2f)." % (self.predicate, ",".join(self.terms), prob)
         else:
             self.string = self.f
-        
+    
+    ## return string value of the expr in case we need it elsewhere with different type
     def to_string(self):
         return self.string
 
@@ -31,7 +32,7 @@ class pl_expr:
         return self.string
         
 class pl_fact:
-    def __init__ (self, fact, probs = None):
+    def __init__ (self, fact, probs = None):  ## probabilities placeholders
         self._parse_fact(fact, probs)
         
     def _parse_fact(self, fact, probs):
@@ -42,7 +43,7 @@ class pl_fact:
         if ":-" in fact: 
             if_ind = fact.index(":-")
             self.lh = pl_expr(fact[:if_ind], prob_pred)
-            replacements = {"),": ")AND", ");": ")OR"}
+            replacements = {"),": ")AND", ");": ")OR"}  ## AND OR conditions placeholders
             replacements = dict((re.escape(k), v) for k, v in replacements.items()) 
             pattern = re.compile("|".join(replacements.keys()))
             rh = pattern.sub(lambda x: replacements[re.escape(x.group(0))], fact[if_ind + 2:])
@@ -54,34 +55,41 @@ class pl_fact:
         
             rs = [i.to_string() for i in self.rhs]
             self.fact = (self.lh.to_string() + ":-" + ",".join(rs))
-        else:
+        else:   ## to store normal expr as facts as well in the database
             self.lh = pl_expr(fact, prob_pred)
             self.rhs = []
             self.fact = self.lh.to_string()
             
-    def rule_terms(self, rule_string):
+    def rule_terms(self, rule_string):  ## getting list of unique terms
         s = re.sub(" ", "", rule_string)
         s = re.findall('\((.*?)\)', s)
         s = [i.split(",") for i in s]
         s = list(chain(*s))
         return list(unique_everseen(s))
-
+    
+    ## returning string value of the fact
     def to_string(self):
         return self.fact
 
     def __repr__ (self) :
         return self.fact
-    
+
+## goal class which will help us query the rule branches in the facts tree    
 class goal :
     def __init__ (self, fact, parent = None, domain = {}) :
         self.fact = fact
-        self.parent = parent
-        self.domain = deepcopy(domain)
+        self.parent = parent  ## parent goal which is a step above in the tree
+        ## to keep the domain of the goal independent 
+        ## as we will change domains a lot in the search
+        self.domain = deepcopy(domain)  
         self.ind = 0 
 
     def __repr__ (self) :
         return "Goal = %s, parent = %s" % (self.fact, self.parent)
-        
+
+## unify function that will bind variables in the search to their counterparts in the tree
+## it takes two pl_expr and try to match the uppercased in lh or lh.domain with their corresponding
+## values in rh itself or its domain
 def unify(lh, rh, lh_domain = None, rh_domain = None):
     if rh_domain == None:
         rh_domain = {} #dict(zip(rh.terms, rh.terms))
@@ -109,19 +117,26 @@ def unify(lh, rh, lh_domain = None, rh_domain = None):
                 return False       
     return True
 
+## the queue object we will use to store goals we need to search
+## FIFO (First In First Out)
 class search_queue():
     def __init__(self):
-        self._container = deque()
+        self._container = deque()  ## deque() not list [] 
+                                   ## the idea is to pop from the left side and deque()
     @property
     def empty(self):
         return not self._container
     def push(self, expr):
         self._container.append(expr)
     def pop(self):
-        return self._container.popleft() # FIFO
+        return self._container.popleft() # FIFO popping from the left O(1)
     def __repr__(self):
         return repr(self._container)
-    
+
+## the knowledge base object where we will store the facts and rules
+## it's a dictionary of dictionaries where main keys are the predicates
+## to speed up searching by looking only into relevant buckets rather than looping over 
+## the whole database
 class knowledge_base(object):
     _id = 0
     def __init__(self, name = None):
@@ -130,10 +145,13 @@ class knowledge_base(object):
             name = "_%d" % knowledge_base._id
             knowledge_base._id += 1
         self.name = name
-        
+    
+    ## the main function that adds new entries or append existing ones
+    ## it creates "facts", "goals" and "terms" buckets for each predicate
     def add_kn(self, kn):
         for i in kn:
             i = pl_fact(i)
+            ## rhs are stored as pl_expr here we change class to goal
             g = [goal(pl_fact(r.to_string())) for r in i.rhs]
             if i.lh.predicate in self.db:
                 self.db[i.lh.predicate]["facts"].append(i)
@@ -147,17 +165,21 @@ class knowledge_base(object):
             
     def __call__(self, args):
         self.add_kn(args)
-            
+    
+    ## the function that takes care of equalizing all uppercased variables
     def term_checker(self, expr):
         #if not isinstance(expr, pl_expr):
         #    expr = pl_expr(expr)
         terms = expr.terms[:]
         indx = [x for x,y in enumerate(terms) if y <= "Z"]
         for i in indx:
+            ## give the same value for any uppercased variable in the same index
             terms[i] = "Var" + str(i)
         #return expr, "%s(%s)" % (expr.predicate, ",".join(terms))
         return indx, "%s(%s)" % (expr.predicate, ",".join(terms))
 
+    ## memory decorator which will be called first once .query() method is called
+    ## it takes the pl_expr and checks in cache {} whether it exists or not
     def memory(querizer):
         cache = {}
         @wraps(querizer)
@@ -167,13 +189,15 @@ class knowledge_base(object):
             indx, look_up = self.term_checker(arg1)
             if look_up in cache:
                 #return cache[look_up]
-                temp_cache = cache[look_up]
+                temp_cache = cache[look_up] ## if it already exists return it
             else:
-                new_entry = querizer(self, arg1)
+                new_entry = querizer(self, arg1)  ## if not give it to querizer decorator
                 cache[look_up] = new_entry
                 temp_cache = new_entry
                 #return new_entry
             for d in temp_cache:
+                ## temp_cache takes care of changing constant var names in cache
+                ## to the variable names use by the user
                 if isinstance(d, dict):
                     old = list(d.keys())
                     #for i in range(len(arg1.terms)):
@@ -182,6 +206,11 @@ class knowledge_base(object):
             return temp_cache    
         return memorize_query
 
+    ## querizer decorator is called whenever there's a new query
+    ## it wraps two functions: simple and rule query
+    ## simple_query() only searched facts not rules while
+    ## rule_query() searches rules
+    ## this can help speed up search and querizer orchestrate the function to be called
     def querizer(simple_query):
         def wrap(rule_query):
             @wraps(rule_query)
@@ -198,6 +227,7 @@ class knowledge_base(object):
             return prepare_query 
         return wrap 
     
+    ## simple function it unifies the query with the corresponding facts
     def simple_query(self, expr):
         pred = expr.predicate
         result = []
@@ -209,48 +239,59 @@ class knowledge_base(object):
                 else: result.append(res)
         if len(result) == 0: result.append("No")
         return result
-    
+
+    ## rule_query() is the main search function
     @memory
     @querizer(simple_query)
     def rule_query(self, expr):
-       # pdb.set_trace()
-        rule = pl_fact(expr.to_string())
+       # pdb.set_trace() # I used to trace every step in the search that consumed me to figure out :D
+        rule = pl_fact(expr.to_string()) # change expr to rule class
         answer = []
+        ## start from a random point (goal) outside the tree
         start = goal(pl_fact("start(search):-from(random_point)"))
+        ## put the expr as a goal in the random point to connect it with the tree
         start.fact.rhs = [expr]
-        queue = search_queue()
+        queue = search_queue() ## start the queue and fill with first random point
         queue.push(start)
-        while not queue.empty:
+        while not queue.empty: ## keep searching until it is empty meaning nothing left to be searched
             current_goal = queue.pop()
-            if current_goal.ind >= len(current_goal.fact.rhs):
-                if current_goal.parent == None:
-                    if current_goal.domain:
+            if current_goal.ind >= len(current_goal.fact.rhs): ## all rule goals have been searched
+                if current_goal.parent == None: ## no more parents 
+                    if current_goal.domain:  ## if there is an answer return it
                         answer.append(current_goal.domain)
-                    else: answer.append("Yes")                      
-                    continue
-                parent = deepcopy(current_goal.parent)
-                unify(parent.fact.rhs[parent.ind],
-                      current_goal.fact.lh,
+                    else: answer.append("Yes") ## if no returns Yes
+                    continue ## if no answer found go back to the parent a step above again    
+                parent = deepcopy(current_goal.parent) 
+                ## deepcopy to keep it unaffected from following unify 
+                unify(parent.fact.rhs[parent.ind], ## unify parent goals
+                      current_goal.fact.lh,  ## with their children to go step down
                       parent.domain,
                       current_goal.domain)
-                parent.ind += 1
-                queue.push(parent)
+                parent.ind += 1 ## next rh in the same goal object (lateral move) 
+                queue.push(parent) ## add the parent to the queue to be searched
                 continue
-                                          
+            
+            ## get the rh expr from the current goal to look for its predicate in database
             rule = current_goal.fact.rhs[current_goal.ind]
             if rule.predicate in self.db:
+                ## search relevant buckets so it speeds up search
                 rule_f = self.db[rule.predicate]
-                for f in range(len(rule_f["facts"])):
+                for f in range(len(rule_f["facts"])): ## loop over corresponding facts
+                    ## take only the ones with the same predicate and same number of terms
                     if len(rule.terms) != len(rule_f["facts"][f].lh.terms): continue
+                    ## a child goal from the current fact with current goal as parent    
                     child = goal(rule_f["facts"][f], current_goal)
+                    ## unify current rule fact lh with current goal rhs
                     uni = unify(rule_f["facts"][f].lh, rule,
-                                child.domain,
-                                current_goal.domain)
-                    if uni: queue.push(child)
+                                child.domain, ## saving in child domain
+                                current_goal.domain) ## using current goal domain
+                    if uni: queue.push(child) ## if unify succeeds add child to queue to be searched
                                           
-        if len(answer) == 0: answer.append("No")    
+        if len(answer) == 0: answer.append("No")  ## if no answers at all return "No"  
         return answer
-                                          
+
+    ## query method will only call rule_query which will call the decorators chain
+    ## it is only to be user intuitive readable method                                      
     def query(self, expr):
         return self.rule_query(expr)
 
