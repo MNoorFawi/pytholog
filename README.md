@@ -10,9 +10,7 @@ reasoning with machine learning.
 future version will have implementation of logical operators and
 probability with logics.
 
-###### OR can be implemented with defining the rules as many times as the OR facts. For example, to say "fly(X) :- bird(X) ; wings(X)." can be defined as follows:
-######          fly(X) :- bird(X).
-######          fly(X) :- wings(X).
+###### OR can be implemented with defining the rules as many times as the OR facts. For example, to say "fly(X) :- bird(X) ; wings(X)." can be defined as two rules as follows: "fly(X) :- bird(X)." and "fly(X) :- wings(X)."
 
 #### prolog syntax
 
