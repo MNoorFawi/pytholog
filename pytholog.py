@@ -128,7 +128,7 @@ class knowledge_base(object):
         self.db = {}
         if not name:
             name = "_%d" % knowledge_base._id
-        knowledge_base._id += 1
+            knowledge_base._id += 1
         self.name = name
         
     def add_kn(self, kn):
