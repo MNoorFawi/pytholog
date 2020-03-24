@@ -87,6 +87,14 @@ class goal :
     def __repr__ (self) :
         return "Goal = %s, parent = %s" % (self.fact, self.parent)
 
+## check whether there is a number in terms or not        
+def is_number(s):
+    try: 
+        float(s)
+        return True
+    except ValueError:
+        return False        
+
 ## unify function that will bind variables in the search to their counterparts in the tree
 ## it takes two pl_expr and try to match the uppercased in lh or lh.domain with their corresponding
 ## values in rh itself or its domain
@@ -103,11 +111,11 @@ def unify(lh, rh, lh_domain = None, rh_domain = None):
     for i in range(nterms):
         rh_arg  = rh.terms[i]
         lh_arg = lh.terms[i]
-        if rh_arg <= 'Z': 
+        if rh_arg <= "Z" and not is_number(rh_arg): 
             rh_val = rh_domain.get(rh_arg)
         else: rh_val = rh_arg
         if rh_val:    # fact or variable in search
-            if lh_arg <= 'Z':  #variable in destination
+            if lh_arg <= "Z" and not is_number(lh_arg):  #variable in destination
                 lh_val = lh_domain.get(lh_arg)
                 if not lh_val: 
                     lh_domain[lh_arg] = rh_val  
