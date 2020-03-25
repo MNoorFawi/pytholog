@@ -3,7 +3,7 @@ pytholog
 
 ## Prolog in Python
 
-Python module, a library to be, that enables using prolog logic in
+Python library that enables using prolog logic in
 python. The aim of the library is to explore ways to use symbolic
 reasoning with machine learning.
 
@@ -44,6 +44,12 @@ inside python aiming to combine the power of machine learning and
 symbolic reasoning.
 
 #### pytholog Implementation
+
+##### Installation
+
+```bash
+pip install pytholog
+```
 
 ``` python
 import pytholog as pl
@@ -98,35 +104,9 @@ print("\nlength: ", len(new_kb.db))
 #                       ['savory', 'meat'],
 #                       ['savory', 'cheese'],
 #                       ['sweet', 'juice']]},
-#  'food_flavor': {'facts': [food_flavor(X,Y):-food_type(X,Z),flavor(Y,Z)],
-#                  'goals': [[Goal = food_type(X,Z), parent = None,
-#                             Goal = flavor(Y,Z), parent = None]],
-#                  'terms': [['X', 'Y', 'Z']]},
-#  'food_type': {'facts': [food_type(gouda,cheese),
-#                          food_type(ritz,cracker),
-#                          food_type(steak,meat),
-#                          food_type(sausage,meat),
-#                          food_type(limonade,juice),
-#                          food_type(cookie,dessert)],
-#                'goals': [[], [], [], [], [], []],
-#                'terms': [['gouda', 'cheese'],
-#                          ['ritz', 'cracker'],
-#                          ['steak', 'meat'],
-#                          ['sausage', 'meat'],
-#                          ['limonade', 'juice'],
-#                          ['cookie', 'dessert']]},
-#  'likes': {'facts': [likes(noor,sausage),
-#                      likes(melissa,pasta),
-#                      likes(dmitry,cookie),
-#                      likes(nikita,sausage),
-#                      likes(assel,limonade)],
-#            'goals': [[], [], [], [], []],
-#            'terms': [['noor', 'sausage'],
-#                      ['melissa', 'pasta'],
-#                      ['dmitry', 'cookie'],
-#                      ['nikita', 'sausage'],
-#                      ['assel', 'limonade']]}}
-# 
+# ...
+# ...
+# ...
 # length:  5
 ```
 

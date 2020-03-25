@@ -62,7 +62,7 @@ class pl_fact:
             
     def rule_terms(self, rule_string):  ## getting list of unique terms
         s = re.sub(" ", "", rule_string)
-        s = re.findall('\((.*?)\)', s)
+        s = re.findall(r"\((.*?)\)", s)
         s = [i.split(",") for i in s]
         s = list(chain(*s))
         return list(unique_everseen(s))
