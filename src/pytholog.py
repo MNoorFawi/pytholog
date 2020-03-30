@@ -1,4 +1,4 @@
-import re #, pdb
+import re#, pdb
 from copy import deepcopy
 from collections import deque 
 from functools import wraps #, lru_cache
@@ -13,11 +13,16 @@ class pl_expr:
     def _parse_expr(self, fact, prob):
         fact = fact.replace(" ", "")
         self.f = fact
+        splitting = "is|\*|\+|\-|\/|>|<|>=|<="
+        if "(" not in fact: 
+            fact = "(" + fact + ")"
         pred_ind = fact.index("(")
         self.predicate = fact[:pred_ind]
         self.terms = fact[pred_ind:]
         to_remove = str.maketrans("", "", "() ")
-        self.terms = self.terms.translate(to_remove).split(",")
+        self.terms = self.terms.translate(to_remove)
+        if self.predicate == "": self.terms = re.split(splitting, self.terms)
+        else: self.terms = self.terms.split(",")
         self.prob = prob
         if self.prob:
             self.string = "%s(%s,%.2f)." % (self.predicate, ",".join(self.terms), prob)
@@ -94,6 +99,19 @@ def is_number(s):
         return True
     except ValueError:
         return False        
+        
+def prob_parser(domain, rule_string, rule_terms):
+    if "is" in rule_string:
+        s = rule_string.split("is")
+        key = s[0]
+        value = s[1]
+    else:
+        key = list(domain.keys())[0]
+        value = rule_string
+    for i in rule_terms:
+        if i in domain.keys():
+            value = re.sub(i, str(domain[i]), value)            
+    return key, value
 
 ## unify function that will bind variables in the search to their counterparts in the tree
 ## it takes two pl_expr and try to match the uppercased in lh or lh.domain with their corresponding
@@ -252,7 +270,7 @@ class knowledge_base(object):
     @memory
     @querizer(simple_query)
     def rule_query(self, expr):
-       # pdb.set_trace() # I used to trace every step in the search that consumed me to figure out :D
+        #pdb.set_trace() # I used to trace every step in the search that consumed me to figure out :D
         rule = pl_fact(expr.to_string()) # change expr to rule class
         answer = []
         ## start from a random point (goal) outside the tree
@@ -267,7 +285,8 @@ class knowledge_base(object):
                 if current_goal.parent == None: ## no more parents 
                     if current_goal.domain:  ## if there is an answer return it
                         answer.append(current_goal.domain)
-                    else: answer.append("Yes") ## if no returns Yes
+                    else: 
+                        answer.append("Yes") ## if no returns Yes
                     continue ## if no answer found go back to the parent a step above again    
                 parent = deepcopy(current_goal.parent) 
                 ## deepcopy to keep it unaffected from following unify 
@@ -281,7 +300,21 @@ class knowledge_base(object):
             
             ## get the rh expr from the current goal to look for its predicate in database
             rule = current_goal.fact.rhs[current_goal.ind]
-            if rule.predicate in self.db:
+            
+            if rule.predicate == "":
+                key, value = prob_parser(current_goal.domain, rule.to_string(), rule.terms)
+                value = eval(value)
+                if value == True: 
+                    value = current_goal.domain[key]
+                elif value == False:
+                    value = "No"
+                current_goal.domain[key] = value
+                prob_child = goal(pl_fact(rule.to_string()),
+                                  parent = current_goal,
+                                  domain = current_goal.domain)
+                queue.push(prob_child)
+                
+            elif rule.predicate in self.db:
                 ## search relevant buckets so it speeds up search
                 rule_f = self.db[rule.predicate]
                 for f in range(len(rule_f["facts"])): ## loop over corresponding facts
@@ -296,6 +329,7 @@ class knowledge_base(object):
                     if uni: queue.push(child) ## if unify succeeds add child to queue to be searched
                                           
         if len(answer) == 0: answer.append("No")  ## if no answers at all return "No"  
+        
         return answer
 
     ## query method will only call rule_query which will call the decorators chain
@@ -307,5 +341,4 @@ class knowledge_base(object):
         return "Knowledge Base: " + self.name
 
     __repr__ = __str__
-    
     

@@ -7,8 +7,7 @@ Python library that enables using prolog logic in
 python. The aim of the library is to explore ways to use symbolic
 reasoning with machine learning.
 
-future version will have implementation of logical operators and
-probability with logics.
+Now pytholog support probabilities.
 
 ###### OR can be implemented with defining the rules as many times as the OR facts. For example, to say "fly(X) :- bird(X) ; wings(X)." can be defined as two rules as follows: "fly(X) :- bird(X)." and "fly(X) :- wings(X)."
 
@@ -58,11 +57,7 @@ import pytholog as pl
 #### Defining a knowledge base object to store the facts and rules.
 
 ``` python
-from pprint import pprint
 new_kb = pl.knowledge_base("flavor")
-print("KB before filling:")
-print(new_kb)
-print(new_kb.db)
 new_kb(["likes(noor, sausage)",
         "likes(melissa, pasta)",
         "likes(dmitry, cookie)",
@@ -80,34 +75,6 @@ new_kb(["likes(noor, sausage)",
         "flavor(sweet, juice)",
         "food_flavor(X, Y) :- food_type(X, Z), flavor(Y, Z)",
         "dish_to_like(X, Y) :- likes(X, L), food_type(L, T), flavor(F, T), food_flavor(Y, F)"])
-print("\nKB after filling:")
-pprint(new_kb.db)
-print("\nlength: ", len(new_kb.db))
-
-# KB before filling:
-# Knowledge Base: flavor
-# {}
-# 
-# KB after filling:
-# {'dish_to_like': {'facts': [dish_to_like(X,Y):-likes(X,L),food_type(L,T),flavor(F,T),food_flavor(Y,F)],
-#                   'goals': [[Goal = likes(X,L), parent = None,
-#                              Goal = food_type(L,T), parent = None,
-#                              Goal = flavor(F,T), parent = None,
-#                              Goal = food_flavor(Y,F), parent = None]],
-#                   'terms': [['X', 'Y', 'L', 'T', 'F']]},
-#  'flavor': {'facts': [flavor(sweet,dessert),
-#                       flavor(savory,meat),
-#                       flavor(savory,cheese),
-#                       flavor(sweet,juice)],
-#             'goals': [[], [], [], []],
-#             'terms': [['sweet', 'dessert'],
-#                       ['savory', 'meat'],
-#                       ['savory', 'cheese'],
-#                       ['sweet', 'juice']]},
-# ...
-# ...
-# ...
-# length:  5
 ```
 
 Let’s do some queries in this database using its facts and rules.
@@ -142,7 +109,6 @@ print(time() - start)
 
 ``` python
 # query 2
-from time import time
 start = time()
 print(new_kb.query(pl.pl_expr("food_flavor(Food, sweet)")))
 print(time() - start)
@@ -154,18 +120,6 @@ print(time() - start)
 As you see, it took almost no time to return the same answer again and
 it also takes care of different Uppercased variable inputs as they
 anyways will be the same result no matter what they are.
-
-More Queries:
-
-``` python
-new_kb.query(pl.pl_expr("food_flavor(Food, Flavor)"))
-
-# [{'Food': 'gouda', 'Flavor': 'savory'},
-#  {'Food': 'steak', 'Flavor': 'savory'},
-#  {'Food': 'sausage', 'Flavor': 'savory'},
-#  {'Food': 'limonade', 'Flavor': 'sweet'},
-#  {'Food': 'cookie', 'Flavor': 'sweet'}]
-```
 
 Now we will use the **dish\_to\_like** rule to recommend dishes to
 persons based on taste preferences.
@@ -207,22 +161,13 @@ problem and prolog will answer.
 ## new knowledge base object
 city_color = pl.knowledge_base("city_color")
 city_color([
-    ## facts that red, green and blue are different from each others
     "different(red, green)",
     "different(red, blue)",
     "different(green, red)", 
     "different(green, blue)",
     "different(blue, red)", 
     "different(blue, green)",
-    ## rule that the five cities should be with different colors
-    """coloring(A, M, G, T, F) :- different(M, T),
-    different(M, A),
-    different(A, T),
-    different(A, M),
-    different(A, G),
-    different(A, F),
-    different(G, F),
-    different(G, T)"""
+    "coloring(A, M, G, T, F) :- different(M, T),different(M, A),different(A, T),different(A, M),different(A, G),different(A, F),different(G, F),different(G, T)"
 ])
 ```
 
@@ -238,6 +183,28 @@ city_color.query(pl.pl_expr("coloring(Alabama, Mississippi, Georgia, Tennessee, 
 #  'Georgia': 'red',
 #  'Tennessee': 'green',
 #  'Florida': 'green'}
+```
+
+Now let's try to play with some probabilities.
+First in prolog **"is"** is used to assign the result of operations. 
+For example, if we want to say "A = 3 * 4", we say "A is 3 * 4", not "A = 3 * 4" because this is unification not assignment.
+
+Let's define some dummy knowledge base with probabilities and query them:
+###### The numbers are totally dummy and have no meanings just to explain the functionality.
+
+```python
+battery_kb = pl.knowledge_base("battery")
+battery_kb(["battery(dead,P) :- voltmeter(battery_terminals,abnormal,P2), P is P2 + 0.5",
+			"battery(dead,P) :- electrical_problem(P), P >= 0.8",
+			"battery(dead,P) :- electrical_problem(P2), age(battery,old,P3), P is P2 * P3 * 0.9",
+			"electrical_problem(0.7)",
+			"age(battery,old, 0.8)",
+			"voltmeter(battery_terminals,abnormal,0.6)"])
+			
+battery_kb.query(pl.pl_expr("battery(dead, Probability)"))
+
+# [{'Probability': 1.1}, {'Probability': 'No'}, {'Probability': 0.504}]
+# the second one is "No" because the condition has not been met.
 ```
 
 Future implementation will try to come up with ideas to combine this
