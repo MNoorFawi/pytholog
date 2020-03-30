@@ -7,7 +7,7 @@ Python library that enables using prolog logic in
 python. The aim of the library is to explore ways to use symbolic
 reasoning with machine learning.
 
-Now pytholog support probabilities.
+Now pytholog supports probabilities.
 
 ###### OR can be implemented with defining the rules as many times as the OR facts. For example, to say "fly(X) :- bird(X) ; wings(X)." can be defined as two rules as follows: "fly(X) :- bird(X)." and "fly(X) :- wings(X)."
 
@@ -199,13 +199,14 @@ battery_kb(["battery(dead,P) :- voltmeter(battery_terminals,abnormal,P2), P is P
 			"battery(dead,P) :- electrical_problem(P2), age(battery,old,P3), P is P2 * P3 * 0.9",
 			"electrical_problem(0.7)",
 			"age(battery,old, 0.8)",
-			"voltmeter(battery_terminals,abnormal,0.6)"])
+			"voltmeter(battery_terminals,abnormal,0.3)"])
 			
 battery_kb.query(pl.pl_expr("battery(dead, Probability)"))
 
-# [{'Probability': 1.1}, {'Probability': 'No'}, {'Probability': 0.504}]
+# [{'Probability': 0.8}, {'Probability': 'No'}, {'Probability': 0.504}]
 # the second one is "No" because the condition has not been met.
 ```
+###### for another example of nested probabilities, see [friends_prob.md](/friends_prob.md)
 
 Future implementation will try to come up with ideas to combine this
 technique with **machine learning algorithms and neural networks**
