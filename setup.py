@@ -5,7 +5,7 @@ with open("README.md", "r", encoding="utf8") as rm:
 
 setup(
       name="pytholog",
-      version="2.0.0", 
+      version="2.0.1", 
       description="write prolog in python with logic probabilities",
       py_modules=["pytholog"],
       package_dir={"": "src"},
