@@ -164,12 +164,13 @@ class search_queue():
 ## to speed up searching by looking only into relevant buckets rather than looping over 
 ## the whole database
 class knowledge_base(object):
-    _id = 0
+    __id = 0
     def __init__(self, name = None):
         self.db = {}
         if not name:
-            name = "_%d" % knowledge_base._id
-        knowledge_base._id += 1
+            name = "_%d" % knowledge_base.__id
+        self.id = knowledge_base.__id
+        knowledge_base.__id += 1
         self.name = name
         self.__cache = {}
     
