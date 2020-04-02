@@ -169,8 +169,9 @@ class knowledge_base(object):
         self.db = {}
         if not name:
             name = "_%d" % knowledge_base._id
-            knowledge_base._id += 1
+        knowledge_base._id += 1
         self.name = name
+        self.__cache = {}
     
     ## the main function that adds new entries or append existing ones
     ## it creates "facts", "goals" and "terms" buckets for each predicate
@@ -207,18 +208,18 @@ class knowledge_base(object):
     ## memory decorator which will be called first once .query() method is called
     ## it takes the pl_expr and checks in cache {} whether it exists or not
     def memory(querizer):
-        cache = {}
+        #cache = {}
         @wraps(querizer)
         def memorize_query(self, arg1):
             temp_cache = {}
             #original, look_up = self.term_checker(arg1)
             indx, look_up = self.term_checker(arg1)
-            if look_up in cache:
+            if look_up in self.__cache:
                 #return cache[look_up]
-                temp_cache = cache[look_up] ## if it already exists return it
+                temp_cache = self.__cache[look_up] ## if it already exists return it
             else:
                 new_entry = querizer(self, arg1)  ## if not give it to querizer decorator
-                cache[look_up] = new_entry
+                self.__cache[look_up] = new_entry
                 temp_cache = new_entry
                 #return new_entry
             for d in temp_cache:
