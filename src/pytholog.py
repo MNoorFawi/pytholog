@@ -13,7 +13,7 @@ class pl_expr:
     def _parse_expr(self, fact):
         fact = fact.replace(" ", "")
         self.f = fact
-        splitting = "is|\*|\+|\-|\/|>=|<=|>|<|and|or|in|not"
+        splitting = r"is|\*|\+|\-|\/|>=|<=|>|<|and|or|in|not"
         if "(" not in fact: 
             fact = "(" + fact + ")"
         pred_ind = fact.index("(")
@@ -102,7 +102,7 @@ def prob_parser(domain, rule_string, rule_terms):
     for i in rule_terms:
         if i in domain.keys():
             value = re.sub(i, str(domain[i]), value)
-    value = re.sub(r'(and|or|in|not)', ' \g<0> ', value) ## add spaces after and before the keywords so that eval() can see them
+    value = re.sub(r"(and|or|in|not)", r" \g<0> ", value) ## add spaces after and before the keywords so that eval() can see them
     return key, value
 
 ## unify function that will bind variables in the search to their counterparts in the tree
