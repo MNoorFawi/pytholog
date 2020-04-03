@@ -50,38 +50,28 @@ Prolog:
 
 ```prolog
 influences(X, rebecca, P).
-
 % P = 0.59999999999999998
 % X = peter ? ;
-
 % P = 0.59999999999999998
 % X = daniel ? ;
 
 smokes(Who).
-
 % Who = peter ? ;
-
 % Who = rebecca ;
 
 to_smoke(Who, P).
-
 % P = 0.096000000000000016
 % Who = daniel ? ;
-
 % P = 0.035999999999999997
 % Who = david ? ;
 
 to_have_asthma(Who, P).
-
 % P = 0.40000000000000002
 % Who = peter ? ;
-
 % P = 0.40000000000000002
 % Who = rebecca ? ;
-
 % P = 0.024000000000000004
 % Who = daniel ? ;
-
 % P = 0.0089999999999999993
 % Who = david ? ;
 ```

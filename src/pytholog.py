@@ -7,13 +7,13 @@ from more_itertools import unique_everseen
 from heapq import heappush, heappop
 
 class pl_expr:
-    def __init__ (self, fact, prob = None) :  ## putting probabilities placeholders for future implementation.
-        self._parse_expr(fact, prob)
+    def __init__ (self, fact):
+        self._parse_expr(fact)
             
-    def _parse_expr(self, fact, prob):
+    def _parse_expr(self, fact):
         fact = fact.replace(" ", "")
         self.f = fact
-        splitting = "is|\*|\+|\-|\/|>|<|>=|<="
+        splitting = "is|\*|\+|\-|\/|>=|<=|>|<|and|or|in|not"
         if "(" not in fact: 
             fact = "(" + fact + ")"
         pred_ind = fact.index("(")
@@ -23,11 +23,7 @@ class pl_expr:
         self.terms = self.terms.translate(to_remove)
         if self.predicate == "": self.terms = re.split(splitting, self.terms)
         else: self.terms = self.terms.split(",")
-        self.prob = prob
-        if self.prob:
-            self.string = "%s(%s,%.2f)." % (self.predicate, ",".join(self.terms), prob)
-        else:
-            self.string = self.f
+        self.string = self.f
     
     ## return string value of the expr in case we need it elsewhere with different type
     def to_string(self):
@@ -37,31 +33,25 @@ class pl_expr:
         return self.string
         
 class pl_fact:
-    def __init__ (self, fact, probs = None):  ## probabilities placeholders
-        self._parse_fact(fact, probs)
+    def __init__ (self, fact):
+        self._parse_fact(fact)
         
-    def _parse_fact(self, fact, probs):
+    def _parse_fact(self, fact):
         fact = fact.replace(" ", "")
         self.terms = self.rule_terms(fact)
-        if probs: prob_pred = probs[0]
-        else: prob_pred = None
         if ":-" in fact: 
             if_ind = fact.index(":-")
-            self.lh = pl_expr(fact[:if_ind], prob_pred)
+            self.lh = pl_expr(fact[:if_ind])
             replacements = {"),": ")AND", ");": ")OR"}  ## AND OR conditions placeholders
             replacements = dict((re.escape(k), v) for k, v in replacements.items()) 
             pattern = re.compile("|".join(replacements.keys()))
             rh = pattern.sub(lambda x: replacements[re.escape(x.group(0))], fact[if_ind + 2:])
             rh = re.split("AND|OR", rh)
-            if probs and len(probs) > 1:
-                self.rhs = [pl_expr(g, p) for g, p in zip(rh, probs[1:])]
-            else:
-                self.rhs = [pl_expr(g) for g in rh] 
-        
+            self.rhs = [pl_expr(g) for g in rh] 
             rs = [i.to_string() for i in self.rhs]
             self.fact = (self.lh.to_string() + ":-" + ",".join(rs))
         else:   ## to store normal expr as facts as well in the database
-            self.lh = pl_expr(fact, prob_pred)
+            self.lh = pl_expr(fact)
             self.rhs = []
             self.fact = self.lh.to_string()
             
@@ -99,7 +89,8 @@ def is_number(s):
         return True
     except ValueError:
         return False        
-        
+
+## it parses the operations and returns the keys and the values to be evaluated        
 def prob_parser(domain, rule_string, rule_terms):
     if "is" in rule_string:
         s = rule_string.split("is")
@@ -110,7 +101,8 @@ def prob_parser(domain, rule_string, rule_terms):
         value = rule_string
     for i in rule_terms:
         if i in domain.keys():
-            value = re.sub(i, str(domain[i]), value)            
+            value = re.sub(i, str(domain[i]), value)
+    value = re.sub(r'(and|or|in|not)', ' \g<0> ', value) ## add spaces after and before the keywords so that eval() can see them
     return key, value
 
 ## unify function that will bind variables in the search to their counterparts in the tree
@@ -303,14 +295,19 @@ class knowledge_base(object):
             ## get the rh expr from the current goal to look for its predicate in database
             rule = current_goal.fact.rhs[current_goal.ind]
             
-            if rule.predicate == "":
+            ## Probabilities and numeric evaluation
+            if rule.predicate == "": ## if there is no predicate
                 key, value = prob_parser(current_goal.domain, rule.to_string(), rule.terms)
+                ## eval the mathematic operation
                 value = eval(value)
                 if value == True: 
-                    value = current_goal.domain[key]
+                    value = current_goal.domain.get(key)
+                    ## it is true but there is no key in the domain (helpful for ML rules in future)
+                    if value is None:
+                        value = "Yes"
                 elif value == False:
                     value = "No"
-                current_goal.domain[key] = value
+                current_goal.domain[key] = value ## assign a new key in the domain with the evaluated value
                 prob_child = goal(pl_fact(rule.to_string()),
                                   parent = current_goal,
                                   domain = current_goal.domain)
@@ -338,6 +335,17 @@ class knowledge_base(object):
     ## it is only to be user intuitive readable method                                      
     def query(self, expr):
         return self.rule_query(expr)
+        
+    def rule_search(self, expr):
+        if expr.predicate not in self.db:
+            return "Rule does not exist!"
+        else:
+            res = []
+            rule_f = self.db[expr.predicate]
+            for f in range(len(rule_f["facts"])):
+                if len(expr.terms) != len(rule_f["facts"][f].lh.terms): continue
+                res.append(rule_f["facts"][f])
+        return res
 
     def __str__(self):
         return "Knowledge Base: " + self.name

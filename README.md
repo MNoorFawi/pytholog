@@ -206,7 +206,42 @@ battery_kb.query(pl.pl_expr("battery(dead, Probability)"))
 # [{'Probability': 0.8}, {'Probability': 'No'}, {'Probability': 0.504}]
 # the second one is "No" because the condition has not been met.
 ```
-###### for another example of nested probabilities, see [friends_prob.md](/friends_prob.md)
+###### for another example of nested probabilities, see [friends_prob.md](https://github.com/MNoorFawi/pytholog/blob/master/friends_prob.md)
+
+### Taking rules from Machine Learning model and feed them into knowledge base then try to predict new instances.
+This shows beneficial for **Explainable AI**. One can explain why a model predicts specific prediction.
+
+Let's suppose that we have these rules from a Decision Tree Model to classify iris flowers. And we have a new record for which we try to predict using the rules.
+
+```python
+iris_kb = pl.knowledge_base("iris")
+iris_kb([## Rules
+		 "species(setosa, Truth) :- petal_width(W), Truth is W <= 0.80", 
+         "species(versicolor, Truth) :- petal_width(W), petal_length(L), Truth is W > 0.80 and L <= 4.95",
+         "species(virginica, Truth) :- petal_width(W), petal_length(L), Truth is W > 0.80 and L > 4.95",
+         ## New record
+		 "petal_length(5.1)",
+         "petal_width(2.4)"])
+```
+Now let's try to predict the class:
+
+```python
+
+# [{'Class': 'setosa', 'Truth': 'No'},
+#  {'Class': 'versicolor', 'Truth': 'No'},
+#  {'Class': 'virginica', 'Truth': 'Yes'}]
+```
+
+Now let's extract the rules for some goal or fact.
+
+```python
+iris_kb.rule_search(pl.pl_expr("species(Species, Truth)"))
+
+# [species(setosa,Truth):-petal_width(W),TruthisW<=0.80,
+#  species(versicolor,Truth):-petal_width(W),petal_length(L),TruthisW>0.80andL<=4.95,
+#  species(virginica,Truth):-petal_width(W),petal_length(L),TruthisW>0.80andL>4.95]
+```
+So now we can see the rules why a model chooses a prediction and explain the behavior.
 
 Future implementation will try to come up with ideas to combine this
 technique with **machine learning algorithms and neural networks**
