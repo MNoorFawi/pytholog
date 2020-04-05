@@ -5,8 +5,8 @@ with open("README.md", "r", encoding="utf8") as rm:
 
 setup(
       name="pytholog",
-      version="2.1.0", 
-      description="write prolog in python with logic probabilities",
+      version="2.2.0", 
+      description="Logic Programming in Python",
       py_modules=["pytholog"],
       package_dir={"": "src"},
       long_description=readme,

@@ -243,6 +243,46 @@ iris_kb.rule_search(pl.pl_expr("species(Species, Truth)"))
 ```
 So now we can see the rules why a model chooses a prediction and explain the behavior.
 
+**clear_cache()** is used to clean the cache inside the knowledge_base:
+```python
+new_kb.clear_cache()
+```
+
+### Graph Traversals with Pytholog
+Let's define a weighted directed graph and see if we can get a path, hopefully the shortest, between two nodes using breadth first search.
+
+![](/pytholog_files/figure-gfm/graph.png)
+
+
+```python
+graph = pl.knowledge_base("graph")
+graph(["edge(a, b, 6)", "edge(a, c, 1)", "edge(b, e, 4)",
+	   "edge(b, f, 3)", "edge(c, d, 3)", "edge(d, e, 8)",
+	   "edge(e, f, 2)",
+	   "path(X, Y, W) :- edge(X , Y, W)",
+	   "path(X, Y, W) :- edge(X, Z, W1), path(Z, Y, W2), W is W1 + W2"])
+
+answer, path = graph.query(pl.pl_expr("path(a, f, W)"), show_path = True)
+print(answer)
+print([x for x in path if str(x) > "Z"])
+
+# [{'W': 9}, {'W': 12}, {'W': 14}]
+# ['d', 'b', 'e', 'c']
+```
+Now with the **show_path** argument we can see the nodes the search passed by and we can see it gave all the possible answers and the first one is the best.
+So let's use the **cut** argument to get only the first result and stop the search.
+
+```python
+answer, path = graph.query(pl.pl_expr("path(a, e, W)"), show_path = True, cut = True)
+print(answer)
+print([x for x in path if str(x) > "Z"])
+
+# [{'W': 10}]
+# ['b']
+```
+
+For another more complicated undirected graph example see [graph traversals with pytholog](https://github.com/mnoorfawi/traversing-graphs-using-pytholog)
+
 Future implementation will try to come up with ideas to combine this
 technique with **machine learning algorithms and neural networks**
 

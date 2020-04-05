@@ -203,7 +203,7 @@ class knowledge_base(object):
     def memory(querizer):
         #cache = {}
         @wraps(querizer)
-        def memorize_query(self, arg1):
+        def memorize_query(self, arg1, cut, show_path):
             temp_cache = {}
             #original, look_up = self.term_checker(arg1)
             indx, look_up = self.term_checker(arg1)
@@ -211,7 +211,7 @@ class knowledge_base(object):
                 #return cache[look_up]
                 temp_cache = self.__cache[look_up] ## if it already exists return it
             else:
-                new_entry = querizer(self, arg1)  ## if not give it to querizer decorator
+                new_entry = querizer(self, arg1, cut, show_path)  ## if not give it to querizer decorator
                 self.__cache[look_up] = new_entry
                 temp_cache = new_entry
                 #return new_entry
@@ -234,7 +234,7 @@ class knowledge_base(object):
     def querizer(simple_query):
         def wrap(rule_query):
             @wraps(rule_query)
-            def prepare_query(self, arg1):
+            def prepare_query(self, arg1, cut, show_path):
                 pred = arg1.predicate
                 if pred in self.db:
                     goals_len = 0.0
@@ -243,7 +243,7 @@ class knowledge_base(object):
                     if goals_len == 0:
                         return simple_query(self, arg1)
                     else:
-                        return rule_query(self, arg1)
+                        return rule_query(self, arg1, cut, show_path)
             return prepare_query 
         return wrap 
     
@@ -263,10 +263,11 @@ class knowledge_base(object):
     ## rule_query() is the main search function
     @memory
     @querizer(simple_query)
-    def rule_query(self, expr):
+    def rule_query(self, expr, cut, show_path):
         #pdb.set_trace() # I used to trace every step in the search that consumed me to figure out :D
         rule = pl_fact(expr.to_string()) # change expr to rule class
         answer = []
+        path = []
         ## start from a random point (goal) outside the tree
         start = goal(pl_fact("start(search):-from(random_point)"))
         ## put the expr as a goal in the random point to connect it with the tree
@@ -279,6 +280,7 @@ class knowledge_base(object):
                 if current_goal.parent == None: ## no more parents 
                     if current_goal.domain:  ## if there is an answer return it
                         answer.append(current_goal.domain)
+                        if cut: break
                     else: 
                         answer.append("Yes") ## if no returns Yes
                     continue ## if no answer found go back to the parent a step above again    
@@ -289,6 +291,7 @@ class knowledge_base(object):
                       parent.domain,
                       current_goal.domain)
                 parent.ind += 1 ## next rh in the same goal object (lateral move) 
+                if show_path: path.append(current_goal.domain)
                 queue.push(parent) ## add the parent to the queue to be searched
                 continue
             
@@ -326,15 +329,28 @@ class knowledge_base(object):
                                 child.domain, ## saving in child domain
                                 current_goal.domain) ## using current goal domain
                     if uni: queue.push(child) ## if unify succeeds add child to queue to be searched
-                                          
+                    
+        def get_path(db, expr, path):
+            terms = db[expr.predicate]["facts"][0].lh.terms
+            path = [{k: i[k] for k in i.keys() if k not in terms} for i in path]
+            pathe = [] 
+            for i in path:
+                for k,v in i.items():
+                    pathe.append(v)
+            return set(pathe)
+            
         if len(answer) == 0: answer.append("No")  ## if no answers at all return "No"  
-        
-        return answer
+                             
+        if show_path: 
+            path = get_path(self.db, expr, path)
+            return answer, path
+        else:
+            return answer
 
     ## query method will only call rule_query which will call the decorators chain
     ## it is only to be user intuitive readable method                                      
-    def query(self, expr):
-        return self.rule_query(expr)
+    def query(self, expr, cut = False, show_path = False):
+        return self.rule_query(expr, cut, show_path)
         
     def rule_search(self, expr):
         if expr.predicate not in self.db:
@@ -349,6 +365,10 @@ class knowledge_base(object):
 
     def __str__(self):
         return "Knowledge Base: " + self.name
+        
+    def clear_cache():
+        self.__cache.clear()
 
     __repr__ = __str__
+    
     
