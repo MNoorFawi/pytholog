@@ -253,6 +253,8 @@ Let's define a weighted directed graph and see if we can get a path, hopefully t
 
 ![](/pytholog_files/figure-gfm/graph.png)
 
+###### [Image source](https://dtai.cs.kuleuven.be/problog/tutorial/basic/04_pgraph.html)
+
 
 ```python
 graph = pl.knowledge_base("graph")

@@ -55,3 +55,14 @@ def test_iris():
              "petal_width(2.4)"])
     assert iris_kb.query(pl.pl_expr("species(Class, Truth)"))         
 
+def test_graph():
+    graph = pl.knowledge_base("graph")
+    graph(["edge(a, b, 6)", "edge(a, c, 1)", "edge(b, e, 4)",
+           "edge(b, f, 3)", "edge(c, d, 3)", "edge(d, e, 8)",
+           "edge(e, f, 2)",
+           "path(X, Y, W) :- edge(X , Y, W)",
+           "path(X, Y, W) :- edge(X, Z, W1), path(Z, Y, W2), W is W1 + W2"])
+
+    assert graph.query(pl.pl_expr("path(a, f, W)"), show_path = True)
+    assert graph.query(pl.pl_expr("path(a, e, W)"), show_path = True, cut = True)
+    
