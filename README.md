@@ -194,12 +194,13 @@ Let's define some dummy knowledge base with probabilities and query them:
 
 ```python
 battery_kb = pl.knowledge_base("battery")
-battery_kb(["battery(dead,P) :- voltmeter(battery_terminals,abnormal,P2), P is P2 + 0.5",
-			"battery(dead,P) :- electrical_problem(P), P >= 0.8",
-			"battery(dead,P) :- electrical_problem(P2), age(battery,old,P3), P is P2 * P3 * 0.9",
-			"electrical_problem(0.7)",
-			"age(battery,old, 0.8)",
-			"voltmeter(battery_terminals,abnormal,0.3)"])
+battery_kb([
+	"battery(dead,P) :- voltmeter(battery_terminals,abnormal,P2), P is P2 + 0.5",
+	"battery(dead,P) :- electrical_problem(P), P >= 0.8",
+	"battery(dead,P) :- electrical_problem(P2), age(battery,old,P3), P is P2 * P3 * 0.9",
+	"electrical_problem(0.7)",
+	"age(battery,old, 0.8)",
+	"voltmeter(battery_terminals,abnormal,0.3)"])
 			
 battery_kb.query(pl.pl_expr("battery(dead, Probability)"))
 
@@ -216,12 +217,12 @@ Let's suppose that we have these rules from a Decision Tree Model to classify ir
 ```python
 iris_kb = pl.knowledge_base("iris")
 iris_kb([## Rules
-		 "species(setosa, Truth) :- petal_width(W), Truth is W <= 0.80", 
-         "species(versicolor, Truth) :- petal_width(W), petal_length(L), Truth is W > 0.80 and L <= 4.95",
-         "species(virginica, Truth) :- petal_width(W), petal_length(L), Truth is W > 0.80 and L > 4.95",
-         ## New record
-		 "petal_length(5.1)",
-         "petal_width(2.4)"])
+	"species(setosa, Truth) :- petal_width(W), Truth is W <= 0.80", 
+	"species(versicolor, Truth) :- petal_width(W), petal_length(L), Truth is W > 0.80 and L <= 4.95",
+	"species(virginica, Truth) :- petal_width(W), petal_length(L), Truth is W > 0.80 and L > 4.95",
+	## New record
+	"petal_length(5.1)",
+	"petal_width(2.4)"])
 ```
 Now let's try to predict the class:
 
@@ -258,11 +259,12 @@ Let's define a weighted directed graph and see if we can get a path, hopefully t
 
 ```python
 graph = pl.knowledge_base("graph")
-graph(["edge(a, b, 6)", "edge(a, c, 1)", "edge(b, e, 4)",
-	   "edge(b, f, 3)", "edge(c, d, 3)", "edge(d, e, 8)",
-	   "edge(e, f, 2)",
-	   "path(X, Y, W) :- edge(X , Y, W)",
-	   "path(X, Y, W) :- edge(X, Z, W1), path(Z, Y, W2), W is W1 + W2"])
+graph([
+	"edge(a, b, 6)", "edge(a, c, 1)", "edge(b, e, 4)",
+	"edge(b, f, 3)", "edge(c, d, 3)", "edge(d, e, 8)",
+	"edge(e, f, 2)",
+	"path(X, Y, W) :- edge(X , Y, W)",
+	"path(X, Y, W) :- edge(X, Z, W1), path(Z, Y, W2), W is W1 + W2"])
 
 answer, path = graph.query(pl.pl_expr("path(a, f, W)"), show_path = True)
 print(answer)

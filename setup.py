@@ -5,7 +5,7 @@ with open("README.md", "r", encoding="utf8") as rm:
 
 setup(
       name="pytholog",
-      version="2.2.0", 
+      version="2.2.1", 
       description="Logic Programming in Python",
       #py_modules=["pytholog"],
       #package_dir={"": "src"},
