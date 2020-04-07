@@ -1,5 +1,5 @@
 from collections import deque 
-from heapq import heappush, heappop
+#from heapq import heappush, heappop #was to test implementing priority queue
 
 ## the queue object we will use to store goals we need to search
 ## FIFO (First In First Out)
