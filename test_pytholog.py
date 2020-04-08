@@ -1,7 +1,7 @@
 import pytholog as pl
 
 def test_dishes():
-    food_kb = pl.knowledge_base("food")
+    food_kb = pl.KnowledgeBase("food")
     food_kb(["likes(noor, sausage)",
         "likes(melissa, pasta)",
         "likes(dmitry, cookie)",
@@ -19,12 +19,12 @@ def test_dishes():
         "flavor(sweet, juice)",
         "food_flavor(X, Y) :- food_type(X, Z), flavor(Y, Z)",
         "dish_to_like(X, Y) :- likes(X, L), food_type(L, T), flavor(F, T), food_flavor(Y, F)"])
-    assert food_kb.query(pl.pl_expr("likes(noor, sausage)"))
-    assert food_kb.query(pl.pl_expr("food_flavor(What, sweet)"))
-    assert food_kb.query(pl.pl_expr("dish_to_like(noor, What)"))
+    assert food_kb.query(pl.Expr("likes(noor, sausage)"))
+    assert food_kb.query(pl.Expr("food_flavor(What, sweet)"))
+    assert food_kb.query(pl.Expr("dish_to_like(noor, What)"))
     
 def test_friends():
-    friends_kb = pl.knowledge_base("friends")
+    friends_kb = pl.KnowledgeBase("friends")
     friends_kb([
         "stress(X, P) :- has_lot_work(X, P2), P is P2 * 0.2",
         "to_smoke(X, Prob) :- stress(X, P1), friends(Y, X), influences(Y, X, P2), smokes(Y), Prob is P1 * P2",
@@ -41,28 +41,28 @@ def test_friends():
         "smokes(rebecca)",
         "has_lot_work(daniel, 0.8)",
         "has_lot_work(david, 0.3)"])
-    assert friends_kb.query(pl.pl_expr("influences(X, rebecca, P)"))
-    assert friends_kb.query(pl.pl_expr("smokes(Who)"))
-    assert friends_kb.query(pl.pl_expr("to_smoke(Who, P)"))
-    assert friends_kb.query(pl.pl_expr("to_have_asthma(Who, P)"))
+    assert friends_kb.query(pl.Expr("influences(X, rebecca, P)"))
+    assert friends_kb.query(pl.Expr("smokes(Who)"))
+    assert friends_kb.query(pl.Expr("to_smoke(Who, P)"))
+    assert friends_kb.query(pl.Expr("to_have_asthma(Who, P)"))
     
 def test_iris():
-    iris_kb = pl.knowledge_base("iris")
+    iris_kb = pl.KnowledgeBase("iris")
     iris_kb(["species(setosa, Truth) :- petal_width(W), Truth is W <= 0.80", 
              "species(versicolor, Truth) :- petal_width(W), petal_length(L), Truth is W > 0.80 and L <= 4.95",
              "species(virginica, Truth) :- petal_width(W), petal_length(L), Truth is W > 0.80 and L > 4.95",
              "petal_length(5.1)",
              "petal_width(2.4)"])
-    assert iris_kb.query(pl.pl_expr("species(Class, Truth)"))         
+    assert iris_kb.query(pl.Expr("species(Class, Truth)"))         
 
 def test_graph():
-    graph = pl.knowledge_base("graph")
+    graph = pl.KnowledgeBase("graph")
     graph(["edge(a, b, 6)", "edge(a, c, 1)", "edge(b, e, 4)",
            "edge(b, f, 3)", "edge(c, d, 3)", "edge(d, e, 8)",
            "edge(e, f, 2)",
            "path(X, Y, W) :- edge(X , Y, W)",
            "path(X, Y, W) :- edge(X, Z, W1), path(Z, Y, W2), W is W1 + W2"])
 
-    assert graph.query(pl.pl_expr("path(a, f, W)"), show_path = True)
-    assert graph.query(pl.pl_expr("path(a, e, W)"), show_path = True, cut = True)
+    assert graph.query(pl.Expr("path(a, f, W)"), show_path = True)
+    assert graph.query(pl.Expr("path(a, e, W)"), show_path = True, cut = True)
     

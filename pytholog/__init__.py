@@ -1,6 +1,6 @@
-from .expr import pl_expr
-from .fact import pl_fact
-from .goal import goal
-from .pq import search_queue
-from .knowledge_base import knowledge_base
+from .expr import Expr, pl_expr
+from .fact import Fact
+from .goal import Goal
+from .pq import SearchQueue
+from .knowledge_base import KnowledgeBase, knowledge_base
 from .unify import unify

@@ -1,14 +1,14 @@
 from .util import term_checker, get_path, prob_parser
-from .fact import pl_fact
-from .expr import pl_expr
-from .goal import goal
+from .fact import Fact
+from .expr import Expr
+from .goal import Goal
 from .unify import unify
 from functools import wraps #, lru_cache
 from copy import deepcopy
-from .pq import search_queue
+from .pq import SearchQueue
 
 ## memory decorator which will be called first once .query() method is called
-## it takes the pl_expr and checks in cache {} whether it exists or not
+## it takes the Expr and checks in cache {} whether it exists or not
 def memory(querizer):
     #cache = {}
     @wraps(querizer)
@@ -62,7 +62,7 @@ def simple_query(kb, expr):
     result = []
     for i in kb.db[pred]["facts"]:
         res = {}
-        uni = unify(expr, pl_expr(i.to_string()), res)
+        uni = unify(expr, Expr(i.to_string()), res)
         if uni:
             if len(res) == 0: result.append("Yes")
             else: result.append(res)
@@ -74,14 +74,14 @@ def simple_query(kb, expr):
 @querizer(simple_query)
 def rule_query(kb, expr, cut, show_path):
     #pdb.set_trace() # I used to trace every step in the search that consumed me to figure out :D
-    rule = pl_fact(expr.to_string()) # change expr to rule class
+    rule = Fact(expr.to_string()) # change expr to rule class
     answer = []
     path = []
     ## start from a random point (goal) outside the tree
-    start = goal(pl_fact("start(search):-from(random_point)"))
+    start = Goal(Fact("start(search):-from(random_point)"))
     ## put the expr as a goal in the random point to connect it with the tree
     start.fact.rhs = [expr]
-    queue = search_queue() ## start the queue and fill with first random point
+    queue = SearchQueue() ## start the queue and fill with first random point
     queue.push(start)
     while not queue.empty: ## keep searching until it is empty meaning nothing left to be searched
         current_goal = queue.pop()
@@ -120,7 +120,7 @@ def rule_query(kb, expr, cut, show_path):
             elif value == False:
                 value = "No"
             current_goal.domain[key] = value ## assign a new key in the domain with the evaluated value
-            prob_child = goal(pl_fact(rule.to_string()),
+            prob_child = Goal(Fact(rule.to_string()),
                               parent = current_goal,
                               domain = current_goal.domain)
             queue.push(prob_child)
@@ -132,7 +132,7 @@ def rule_query(kb, expr, cut, show_path):
                 ## take only the ones with the same predicate and same number of terms
                 if len(rule.terms) != len(rule_f["facts"][f].lh.terms): continue
                 ## a child goal from the current fact with current goal as parent    
-                child = goal(rule_f["facts"][f], current_goal)
+                child = Goal(rule_f["facts"][f], current_goal)
                 ## unify current rule fact lh with current goal rhs
                 uni = unify(rule_f["facts"][f].lh, rule,
                             child.domain, ## saving in child domain

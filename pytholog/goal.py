@@ -1,7 +1,7 @@
 from copy import deepcopy
 
 ## goal class which will help us query the rule branches in the facts tree    
-class goal :
+class Goal :
     def __init__ (self, fact, parent = None, domain = {}) :
         self.fact = fact
         self.parent = parent  ## parent goal which is a step above in the tree

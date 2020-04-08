@@ -1,6 +1,6 @@
 import re
 
-class pl_expr:
+class Expr:
     def __init__ (self, fact):
         self._parse_expr(fact)
             
@@ -25,4 +25,21 @@ class pl_expr:
 
     def __repr__ (self) :
         return self.string
-        
+
+class DeprecationHelper(object):
+    def __init__(self, new_target):
+        self.new_target = new_target
+
+    def _warn(self):
+        from warnings import warn
+        warn("pl_expr class has been renamed to Expr!")
+
+    def __call__(self, *args, **kwargs):
+        self._warn()
+        return self.new_target(*args, **kwargs)
+
+    def __getattr__(self, attr):
+        self._warn()
+        return getattr(self.new_target, attr)
+
+pl_expr = DeprecationHelper(Expr)       

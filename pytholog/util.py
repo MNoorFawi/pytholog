@@ -34,8 +34,8 @@ def rule_terms(rule_string):  ## getting list of unique terms
     
 ## the function that takes care of equalizing all uppercased variables
 def term_checker(expr):
-    #if not isinstance(expr, pl_expr):
-    #    expr = pl_expr(expr)
+    #if not isinstance(expr, Expr):
+    #    expr = Expr(expr)
     terms = expr.terms[:]
     indx = [x for x,y in enumerate(terms) if y <= "Z"]
     for i in indx:

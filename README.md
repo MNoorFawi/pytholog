@@ -1,11 +1,10 @@
 pytholog
 ================
 
-## Prolog in Python
+## Write Prolog in Python
 
-Python library that enables using prolog logic in
-python. The aim of the library is to explore ways to use symbolic
-reasoning with machine learning.
+Python library that enables using **logic programming** in python. 
+The aim of the library is to explore ways to use symbolic reasoning with machine learning.
 
 Now pytholog supports probabilities.
 
@@ -57,7 +56,7 @@ import pytholog as pl
 #### Defining a knowledge base object to store the facts and rules.
 
 ``` python
-new_kb = pl.knowledge_base("flavor")
+new_kb = pl.KnowledgeBase("flavor")
 new_kb(["likes(noor, sausage)",
         "likes(melissa, pasta)",
         "likes(dmitry, cookie)",
@@ -80,12 +79,12 @@ new_kb(["likes(noor, sausage)",
 Let’s do some queries in this database using its facts and rules.
 
 ``` python
-new_kb.query(pl.pl_expr("likes(noor, sausage)"))
+new_kb.query(pl.Expr("likes(noor, sausage)"))
 # ['Yes']
 ```
 
 ``` python
-new_kb.query(pl.pl_expr("likes(noor, pasta)"))
+new_kb.query(pl.Expr("likes(noor, pasta)"))
 # ['No']
 ```
 
@@ -100,7 +99,7 @@ query.
 # query 1
 from time import time
 start = time()
-print(new_kb.query(pl.pl_expr("food_flavor(What, sweet)")))
+print(new_kb.query(pl.Expr("food_flavor(What, sweet)")))
 print(time() - start)
 
 # [{'What': 'limonade'}, {'What': 'cookie'}]
@@ -110,7 +109,7 @@ print(time() - start)
 ``` python
 # query 2
 start = time()
-print(new_kb.query(pl.pl_expr("food_flavor(Food, sweet)")))
+print(new_kb.query(pl.Expr("food_flavor(Food, sweet)")))
 print(time() - start)
 
 # [{'Food': 'limonade'}, {'Food': 'cookie'}]
@@ -126,7 +125,7 @@ persons based on taste preferences.
 
 ``` python
 start = time()
-print(new_kb.query(pl.pl_expr("dish_to_like(noor, What)")))
+print(new_kb.query(pl.Expr("dish_to_like(noor, What)")))
 print(time() - start)
 
 # [{'What': 'gouda'}, {'What': 'steak'}, {'What': 'sausage'}]
@@ -137,7 +136,7 @@ Let’s test the Memoization again:
 
 ``` python
 start = time()
-print(new_kb.query(pl.pl_expr("dish_to_like(noor, What)")))
+print(new_kb.query(pl.Expr("dish_to_like(noor, What)")))
 print(time() - start)
 
 # [{'What': 'gouda'}, {'What': 'steak'}, {'What': 'sausage'}]
@@ -159,7 +158,7 @@ problem and prolog will answer.
 
 ``` python
 ## new knowledge base object
-city_color = pl.knowledge_base("city_color")
+city_color = pl.KnowledgeBase("city_color")
 city_color([
     "different(red, green)",
     "different(red, blue)",
@@ -176,7 +175,7 @@ Let’s query the answer:
 ``` python
 ## we will use [0] to return only one answer 
 ## as prolog will give all possible combinations and answers
-city_color.query(pl.pl_expr("coloring(Alabama, Mississippi, Georgia, Tennessee, Florida)"))[0]
+city_color.query(pl.Expr("coloring(Alabama, Mississippi, Georgia, Tennessee, Florida)"))[0]
 
 # {'Alabama': 'blue',
 #  'Mississippi': 'red',
@@ -193,7 +192,7 @@ Let's define some dummy knowledge base with probabilities and query them:
 ###### The numbers are totally dummy and have no meanings just to explain the functionality.
 
 ```python
-battery_kb = pl.knowledge_base("battery")
+battery_kb = pl.KnowledgeBase("battery")
 battery_kb([
 	"battery(dead,P) :- voltmeter(battery_terminals,abnormal,P2), P is P2 + 0.5",
 	"battery(dead,P) :- electrical_problem(P), P >= 0.8",
@@ -202,7 +201,7 @@ battery_kb([
 	"age(battery,old, 0.8)",
 	"voltmeter(battery_terminals,abnormal,0.3)"])
 			
-battery_kb.query(pl.pl_expr("battery(dead, Probability)"))
+battery_kb.query(pl.Expr("battery(dead, Probability)"))
 
 # [{'Probability': 0.8}, {'Probability': 'No'}, {'Probability': 0.504}]
 # the second one is "No" because the condition has not been met.
@@ -215,7 +214,7 @@ This shows beneficial for **Explainable AI**. One can explain why a model predic
 Let's suppose that we have these rules from a Decision Tree Model to classify iris flowers. And we have a new record for which we try to predict using the rules.
 
 ```python
-iris_kb = pl.knowledge_base("iris")
+iris_kb = pl.KnowledgeBase("iris")
 iris_kb([## Rules
 	"species(setosa, Truth) :- petal_width(W), Truth is W <= 0.80", 
 	"species(versicolor, Truth) :- petal_width(W), petal_length(L), Truth is W > 0.80 and L <= 4.95",
@@ -227,6 +226,7 @@ iris_kb([## Rules
 Now let's try to predict the class:
 
 ```python
+iris_kb.query(Expr("species(Class, Truth)"))
 
 # [{'Class': 'setosa', 'Truth': 'No'},
 #  {'Class': 'versicolor', 'Truth': 'No'},
@@ -236,7 +236,7 @@ Now let's try to predict the class:
 Now let's extract the rules for some goal or fact.
 
 ```python
-iris_kb.rule_search(pl.pl_expr("species(Species, Truth)"))
+iris_kb.rule_search(pl.Expr("species(Species, Truth)"))
 
 # [species(setosa,Truth):-petal_width(W),TruthisW<=0.80,
 #  species(versicolor,Truth):-petal_width(W),petal_length(L),TruthisW>0.80andL<=4.95,
@@ -258,7 +258,7 @@ Let's define a weighted directed graph and see if we can get a path, hopefully t
 
 
 ```python
-graph = pl.knowledge_base("graph")
+graph = pl.KnowledgeBase("graph")
 graph([
 	"edge(a, b, 6)", "edge(a, c, 1)", "edge(b, e, 4)",
 	"edge(b, f, 3)", "edge(c, d, 3)", "edge(d, e, 8)",
@@ -266,7 +266,7 @@ graph([
 	"path(X, Y, W) :- edge(X , Y, W)",
 	"path(X, Y, W) :- edge(X, Z, W1), path(Z, Y, W2), W is W1 + W2"])
 
-answer, path = graph.query(pl.pl_expr("path(a, f, W)"), show_path = True)
+answer, path = graph.query(pl.Expr("path(a, f, W)"), show_path = True)
 print(answer)
 print([x for x in path if str(x) > "Z"])
 
@@ -277,7 +277,7 @@ Now with the **show_path** argument we can see the nodes the search passed by an
 So let's use the **cut** argument to get only the first result and stop the search.
 
 ```python
-answer, path = graph.query(pl.pl_expr("path(a, e, W)"), show_path = True, cut = True)
+answer, path = graph.query(pl.Expr("path(a, e, W)"), show_path = True, cut = True)
 print(answer)
 print([x for x in path if str(x) > "Z"])
 

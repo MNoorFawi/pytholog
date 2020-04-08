@@ -1,25 +1,25 @@
 from .util import term_checker, get_path, prob_parser
-from .fact import pl_fact
-from .expr import pl_expr
-from .goal import goal
+from .fact import Fact
+from .expr import Expr
+from .goal import Goal
 from .unify import unify
 from functools import wraps #, lru_cache
 from copy import deepcopy
-from .pq import search_queue
+from .pq import SearchQueue
 from .querizer import *
 
 ## the knowledge base object where we will store the facts and rules
 ## it's a dictionary of dictionaries where main keys are the predicates
 ## to speed up searching by looking only into relevant buckets rather than looping over 
 ## the whole database
-class knowledge_base(object):
+class KnowledgeBase(object):
     __id = 0
     def __init__(self, name = None):
         self.db = {}
         if not name:
-            name = "_%d" % knowledge_base.__id
-        self.id = knowledge_base.__id
-        knowledge_base.__id += 1
+            name = "_%d" % KnowledgeBase.__id
+        self.id = KnowledgeBase.__id
+        KnowledgeBase.__id += 1
         self.name = name
         self._cache = {}
     
@@ -27,9 +27,9 @@ class knowledge_base(object):
     ## it creates "facts", "goals" and "terms" buckets for each predicate
     def add_kn(self, kn):
         for i in kn:
-            i = pl_fact(i)
-            ## rhs are stored as pl_expr here we change class to goal
-            g = [goal(pl_fact(r.to_string())) for r in i.rhs]
+            i = Fact(i)
+            ## rhs are stored as Expr here we change class to Goal
+            g = [Goal(Fact(r.to_string())) for r in i.rhs]
             if i.lh.predicate in self.db:
                 self.db[i.lh.predicate]["facts"].append(i)
                 self.db[i.lh.predicate]["goals"].append(g)
@@ -60,11 +60,29 @@ class knowledge_base(object):
         return res
 
     def __str__(self):
-        return "Knowledge Base: " + self.name
+        return "KnowledgeBase: " + self.name
         
     def clear_cache(self):
         self._cache.clear()
 
     __repr__ = __str__
     
+
+class DeprecationHelper(object):
+    def __init__(self, new_target):
+        self.new_target = new_target
+
+    def _warn(self):
+        from warnings import warn
+        warn("knowledge_base class has been renamed to KnowledgeBase!")
+
+    def __call__(self, *args, **kwargs):
+        self._warn()
+        return self.new_target(*args, **kwargs)
+
+    def __getattr__(self, attr):
+        self._warn()
+        return getattr(self.new_target, attr)
+
+knowledge_base = DeprecationHelper(KnowledgeBase)
     
