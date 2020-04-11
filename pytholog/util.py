@@ -52,3 +52,15 @@ def get_path(db, expr, path):
         for k,v in i.items():
             pathe.append(v)
     return set(pathe)
+
+def pl_read(kb, file):
+    file = open(file, "r")
+    lines = file.readlines()
+    facts = []
+    for i in lines:
+        i = i.strip()
+        i = re.sub(r'\.+$', "", i)
+        facts.append(i)
+    kb(facts)
+    print(f"facts and rules have been added to {kb.name}.db")
+

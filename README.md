@@ -249,6 +249,33 @@ So now we can see the rules why a model chooses a prediction and explain the beh
 new_kb.clear_cache()
 ```
 
+**from_file()** is used to read facts and rules from a prolog ,pl, or txt file:
+```python
+example_kb = pl.KnowledgeBase("example")
+example_kb.from_file("example.txt")
+# facts and rules have been added to example.db
+example_kb.query(pl.Expr("food_flavor(What, savory)"))
+# [{'What': 'gouda'}, {'What': 'steak'}, {'What': 'sausage'}]
+```
+
+Also we can constructs rules or facts looping over dataframes:
+```python
+import pandas as pd
+df = pd.DataFrame({"has_work": ["david", "daniel"], "tasks": [8, 3]})
+df
+#	has_work  tasks
+#0	   david	  8
+#1	  daniel	  3
+ex = pl.KnowledgeBase()
+for i in range(df.shape[0]):
+    ex([f"has_work({df.has_work[i]}, {df.tasks[i]})"])
+
+ex.db
+# {'has_work': {'facts': [has_work(david,8), has_work(daniel,3)],
+#   'goals': [[], []],
+#   'terms': [['david', '8'], ['daniel', '3']]}}
+```
+
 ### Graph Traversals with Pytholog
 Let's define a weighted directed graph and see if we can get a path, hopefully the shortest, between two nodes using breadth first search.
 

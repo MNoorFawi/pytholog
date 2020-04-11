@@ -1,4 +1,4 @@
-from .util import term_checker, get_path, prob_parser
+from .util import term_checker, get_path, prob_parser, pl_read
 from .fact import Fact
 from .expr import Expr
 from .goal import Goal
@@ -58,6 +58,9 @@ class KnowledgeBase(object):
                 if len(expr.terms) != len(rule_f["facts"][f].lh.terms): continue
                 res.append(rule_f["facts"][f])
         return res
+
+    def from_file(self, file):
+        pl_read(self, file)
 
     def __str__(self):
         return "KnowledgeBase: " + self.name
