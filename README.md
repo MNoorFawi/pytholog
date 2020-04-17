@@ -3,6 +3,8 @@ pytholog
 
 ## Write Prolog in Python
 
+[![Build Status](https://travis-ci.com/MNoorFawi/pytholog.svg?branch=master)](https://travis-ci.com/MNoorFawi/pytholog)
+
 Python library that enables using **logic programming** in python. 
 The aim of the library is to explore ways to use symbolic reasoning with machine learning.
 
