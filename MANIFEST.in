@@ -1,0 +1,7 @@
+recursive-include pytholog *.py
+
+include setup.py
+include requirements.txt
+include README.md
+include LICENSE.txt
+include MANIFEST.in
