@@ -14,7 +14,7 @@ Now pytholog supports probabilities.
 
 #### prolog syntax
 
-![](pytholog_files/figure-gfm/prolog_ex.png)
+![](/pytholog_files/figure-gfm/prolog_ex.png)
 
 Prolog takes facts and rules. A fact or a rule has a predicate which in
 “likes(noor, sausage)” is “likes” and in “friend(X, Y)” is “friend”.
@@ -147,9 +147,9 @@ print(time() - start)
 
 ##### City Coloring problem
 
-![](pytholog_files/figure-gfm/city_color.png)
+![](/pytholog_files/figure-gfm/city_color.png)
 
-###### Image Source: “Seven Languages in Seven Weeks” book.
+###### Image Source: [Seven Languages in Seven Weeks book](https://pragprog.com/book/btlang/seven-languages-in-seven-weeks)
 
 The problem is **Constraint Satisfaction Problem**. The problem is to
 color each city using only three colors but no adjacent cities can be
