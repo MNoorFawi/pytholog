@@ -2,6 +2,15 @@ import re
 from itertools import chain
 from more_itertools import unique_everseen
 
+## a variable is anything that starts with an uppercase letter or is an _
+def is_variable(term):
+    if is_number(term):
+        return False
+    elif term <= "Z" or term == "_":
+        return True
+    else:
+        return False
+    
 ## check whether there is a number in terms or not        
 def is_number(s):
     try: 

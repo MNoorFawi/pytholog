@@ -208,7 +208,7 @@ battery_kb.query(pl.Expr("battery(dead, Probability)"))
 # [{'Probability': 0.8}, {'Probability': 'No'}, {'Probability': 0.504}]
 # the second one is "No" because the condition has not been met.
 ```
-###### for another example of nested probabilities, see [friends_prob.md](https://github.com/MNoorFawi/pytholog/blob/master/friends_prob.md)
+###### for another example of nested probabilities, see [friends_prob.md](https://github.com/MNoorFawi/pytholog/blob/master/examples/friends_prob.md)
 
 ### Taking rules from Machine Learning model and feed them into knowledge base then try to predict new instances.
 This shows beneficial for **Explainable AI**. One can explain why a model predicts specific prediction.
@@ -254,7 +254,7 @@ new_kb.clear_cache()
 **from_file()** is used to read facts and rules from a prolog ,pl, or txt file:
 ```python
 example_kb = pl.KnowledgeBase("example")
-example_kb.from_file("example.txt")
+example_kb.from_file("/examples/example.txt")
 # facts and rules have been added to example.db
 example_kb.query(pl.Expr("food_flavor(What, savory)"))
 # [{'What': 'gouda'}, {'What': 'steak'}, {'What': 'sausage'}]

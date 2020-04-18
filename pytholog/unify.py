@@ -1,4 +1,4 @@
-from .util import is_number
+from .util import is_number, is_variable
 
 ## unify function that will bind variables in the search to their counterparts in the tree
 ## it takes two pl_expr and try to match the uppercased in lh or lh.domain with their corresponding
@@ -16,11 +16,12 @@ def unify(lh, rh, lh_domain = None, rh_domain = None):
     for i in range(nterms):
         rh_arg  = rh.terms[i]
         lh_arg = lh.terms[i]
-        if rh_arg <= "Z" and not is_number(rh_arg): 
+        if lh_arg == "_": continue
+        if is_variable(rh_arg): 
             rh_val = rh_domain.get(rh_arg)
         else: rh_val = rh_arg
         if rh_val:    # fact or variable in search
-            if lh_arg <= "Z" and not is_number(lh_arg):  #variable in destination
+            if is_variable(lh_arg):  #variable in destination
                 lh_val = lh_domain.get(lh_arg)
                 if not lh_val: 
                     lh_domain[lh_arg] = rh_val  

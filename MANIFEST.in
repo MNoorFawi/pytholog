@@ -1,13 +1,13 @@
 recursive-include pytholog *.py
+recursive-include examples *.txt
+recursive-include examples *.md
 
 include setup.py
 include requirements.txt
 include README.md
 include MANIFEST.in
 include *.lock
-include *.md
 include *.py
-include *.txt
 include LICENSE
 include Pipfile
 include tox.ini
