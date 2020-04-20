@@ -3,6 +3,9 @@ from collections import deque
 
 ## the queue object we will use to store goals we need to search
 ## FIFO (First In First Out)
+## using FIFO ensures that if cut is used we have the first answer from the facts fed first to KB
+## it is very useful in graph cases to get the shortest path first. But it depends on the order
+## the facts were defined in the knowledge base.
 class SearchQueue():
     def __init__(self):
         self._container = deque()  ## deque() not list [] 
