@@ -177,7 +177,7 @@ Let’s query the answer:
 ``` python
 ## we will use [0] to return only one answer 
 ## as prolog will give all possible combinations and answers
-city_color.query(pl.Expr("coloring(Alabama, Mississippi, Georgia, Tennessee, Florida)"))[0]
+city_color.query(pl.Expr("coloring(Alabama, Mississippi, Georgia, Tennessee, Florida)"), cut = True)
 
 # {'Alabama': 'blue',
 #  'Mississippi': 'red',
@@ -228,7 +228,7 @@ iris_kb([## Rules
 Now let's try to predict the class:
 
 ```python
-iris_kb.query(Expr("species(Class, Truth)"))
+iris_kb.query(pl.Expr("species(Class, Truth)"))
 
 # [{'Class': 'setosa', 'Truth': 'No'},
 #  {'Class': 'versicolor', 'Truth': 'No'},

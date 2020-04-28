@@ -4,7 +4,7 @@ from .expr import Expr
 from .goal import Goal
 from .unify import unify
 from functools import wraps #, lru_cache
-from copy import deepcopy
+#from copy import deepcopy
 from .pq import SearchQueue
 from .querizer import *
 

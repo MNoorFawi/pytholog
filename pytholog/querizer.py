@@ -4,7 +4,7 @@ from .expr import Expr
 from .goal import Goal
 from .unify import unify
 from functools import wraps #, lru_cache
-from copy import deepcopy
+#from copy import deepcopy
 from .pq import SearchQueue
 
 ## memory decorator which will be called first once .query() method is called
@@ -93,7 +93,7 @@ def rule_query(kb, expr, cut, show_path):
                 else: 
                     answer.append("Yes") ## if no returns Yes
                 continue ## if no answer found go back to the parent a step above again    
-            parent = deepcopy(current_goal.parent) 
+            parent = current_goal.parent.__copy__()#deepcopy(current_goal.parent) 
             ## deepcopy to keep it unaffected from following unify 
             unify(parent.fact.rhs[parent.ind], ## unify parent goals
                   current_goal.fact.lh,  ## with their children to go step down
