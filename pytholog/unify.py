@@ -1,4 +1,4 @@
-from .util import is_number, is_variable
+from .util import *
 
 ## unify function that will bind variables in the search to their counterparts in the tree
 ## it takes two pl_expr and try to match the uppercased in lh or lh.domain with their corresponding
@@ -8,25 +8,26 @@ def unify(lh, rh, lh_domain = None, rh_domain = None):
         rh_domain = {} #dict(zip(rh.terms, rh.terms))
     if lh_domain == None:
         lh_domain = {}
+        
     nterms = len(rh.terms)
-    if nterms != len(lh.terms): 
+    if unifiable_check(nterms, rh, lh) == False:
         return False
-    if rh.predicate != lh.predicate: 
-        return False
+    
     for i in range(nterms):
         rh_arg  = rh.terms[i]
         lh_arg = lh.terms[i]
-        if lh_arg == "_": continue
-        if is_variable(rh_arg): 
-            rh_val = rh_domain.get(rh_arg)
-        else: rh_val = rh_arg
+        
+        if lh_arg == "_": 
+            continue
+        
+        rh_val = rh_val_get(rh_arg, lh_arg, rh_domain)
+        
         if rh_val:    # fact or variable in search
-            if is_variable(lh_arg):  #variable in destination
-                lh_val = lh_domain.get(lh_arg)
-                if not lh_val: 
-                    lh_domain[lh_arg] = rh_val  
-                elif lh_val != rh_val:
-                    return False          
-            elif lh_arg != rh_val: 
-                return False       
+            if lh_eval(rh_val, lh_arg, lh_domain) == False:
+                return False
+    
     return True
+    
+
+        
+        

@@ -4,9 +4,9 @@ from .expr import Expr
 from .goal import Goal
 from .unify import unify
 from functools import wraps #, lru_cache
-#from copy import deepcopy
 from .pq import SearchQueue
 from .querizer import *
+from .search_util import *
 
 ## the knowledge base object where we will store the facts and rules
 ## it's a dictionary of dictionaries where main keys are the predicates

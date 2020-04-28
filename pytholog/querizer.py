@@ -4,8 +4,8 @@ from .expr import Expr
 from .goal import Goal
 from .unify import unify
 from functools import wraps #, lru_cache
-#from copy import deepcopy
 from .pq import SearchQueue
+from .search_util import *
 
 ## memory decorator which will be called first once .query() method is called
 ## it takes the Expr and checks in cache {} whether it exists or not
@@ -93,15 +93,10 @@ def rule_query(kb, expr, cut, show_path):
                 else: 
                     answer.append("Yes") ## if no returns Yes
                 continue ## if no answer found go back to the parent a step above again    
-            parent = current_goal.parent.__copy__()#deepcopy(current_goal.parent) 
-            ## deepcopy to keep it unaffected from following unify 
-            unify(parent.fact.rhs[parent.ind], ## unify parent goals
-                  current_goal.fact.lh,  ## with their children to go step down
-                  parent.domain,
-                  current_goal.domain)
-            parent.ind += 1 ## next rh in the same goal object (lateral move) 
+            
+            ## father which is the main rule takes unified child's domain from facts
+            child_to_parent(current_goal, queue)
             if show_path: path.append(current_goal.domain)
-            queue.push(parent) ## add the parent to the queue to be searched
             continue
         
         ## get the rh expr from the current goal to look for its predicate in database
@@ -109,35 +104,18 @@ def rule_query(kb, expr, cut, show_path):
         
         ## Probabilities and numeric evaluation
         if rule.predicate == "": ## if there is no predicate
-            key, value = prob_parser(current_goal.domain, rule.to_string(), rule.terms)
-            ## eval the mathematic operation
-            value = eval(value)
-            if value == True: 
-                value = current_goal.domain.get(key)
-                ## it is true but there is no key in the domain (helpful for ML rules in future)
-                if value is None:
-                    value = "Yes"
-            elif value == False:
-                value = "No"
-            current_goal.domain[key] = value ## assign a new key in the domain with the evaluated value
-            prob_child = Goal(Fact(rule.to_string()),
-                              parent = current_goal,
-                              domain = current_goal.domain)
-            queue.push(prob_child)
+            prob_calc(current_goal, rule, queue)
+            continue
             
         elif rule.predicate in kb.db:
             ## search relevant buckets so it speeds up search
-            rule_f = kb.db[rule.predicate]
-            for f in range(len(rule_f["facts"])): ## loop over corresponding facts
-                ## take only the ones with the same predicate and same number of terms
-                if len(rule.terms) != len(rule_f["facts"][f].lh.terms): continue
-                ## a child goal from the current fact with current goal as parent    
-                child = Goal(rule_f["facts"][f], current_goal)
-                ## unify current rule fact lh with current goal rhs
-                uni = unify(rule_f["facts"][f].lh, rule,
-                            child.domain, ## saving in child domain
-                            current_goal.domain) ## using current goal domain
-                if uni: queue.push(child) ## if unify succeeds add child to queue to be searched
+            rule_f = kb.db[rule.predicate]["facts"]
+            if current_goal.parent == None:
+                # parent gets query inputs from grandfather to start search
+                parent_inherits(rule, rule_f, current_goal, queue)
+            else:
+                # a child to search facts in kb
+                child_assigned(rule, rule_f, current_goal, queue)
                 
     if len(answer) == 0: answer.append("No")  ## if no answers at all return "No"  
                          

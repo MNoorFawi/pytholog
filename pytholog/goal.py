@@ -1,5 +1,3 @@
-#from copy import deepcopy
-
 ## goal class which will help us query the rule branches in the facts tree    
 class Goal :
     def __init__ (self, fact, parent = None, domain = {}, ind = 0) :
