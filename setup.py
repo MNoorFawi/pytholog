@@ -8,7 +8,7 @@ with open("requirements.txt") as rq:
 
 setup(
       name="pytholog",
-      version="2.3.2", 
+      version="2.4.0", 
       description="Logic Programming in Python",
       #py_modules=["pytholog"],
       #package_dir={"": "src"},

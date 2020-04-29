@@ -1,5 +1,5 @@
 from collections import deque 
-#from heapq import heappush, heappop #was to test implementing priority queue
+from bisect import insort
 
 ## the queue object we will use to store goals we need to search
 ## FIFO (First In First Out)
@@ -20,3 +20,19 @@ class SearchQueue():
     def __repr__(self):
         return repr(self._container)
         
+## to store facts and sort them for binary search in queries 
+class FactHeap():
+    def __init__(self):
+        self._container = []
+
+    def push(self, item):
+        insort(self._container, item) # in by sort
+        
+    def __getitem__(self, item):
+         return self._container[item]
+    
+    def __len__(self):
+         return len(self._container)
+    
+    def __repr__(self):
+        return repr(self._container)

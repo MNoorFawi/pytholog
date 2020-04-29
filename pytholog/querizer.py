@@ -1,4 +1,4 @@
-from .util import term_checker, get_path, prob_parser
+from .util import term_checker, get_path, prob_parser, is_number, is_variable
 from .fact import Fact
 from .expr import Expr
 from .goal import Goal
@@ -59,10 +59,18 @@ def querizer(simple_query):
 ## simple function it unifies the query with the corresponding facts
 def simple_query(kb, expr):
     pred = expr.predicate
+    ind = expr.terms[expr.index]
+    search_base = kb.db[pred]["facts"]
     result = []
-    for i in kb.db[pred]["facts"]:
+    if not is_variable(ind):
+        key = ind
+        first, last = fact_binary_search(search_base, key)
+    else:
+        first, last = (0, len(search_base))
+        
+    for i in range(first, last):
         res = {}
-        uni = unify(expr, Expr(i.to_string()), res)
+        uni = unify(expr, Expr(search_base[i].to_string()), res)
         if uni:
             if len(res) == 0: result.append("Yes")
             else: result.append(res)

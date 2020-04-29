@@ -4,7 +4,7 @@ from .expr import Expr
 from .goal import Goal
 from .unify import unify
 from functools import wraps #, lru_cache
-from .pq import SearchQueue
+from .pq import SearchQueue, FactHeap
 from .querizer import *
 from .search_util import *
 
@@ -31,14 +31,20 @@ class KnowledgeBase(object):
             ## rhs are stored as Expr here we change class to Goal
             g = [Goal(Fact(r.to_string())) for r in i.rhs]
             if i.lh.predicate in self.db:
-                self.db[i.lh.predicate]["facts"].append(i)
-                self.db[i.lh.predicate]["goals"].append(g)
-                self.db[i.lh.predicate]["terms"].append(i.terms)
+                self.db[i.lh.predicate]["facts"].push(i)
+                self.db[i.lh.predicate]["terms"].push(i.terms)
+                self.db[i.lh.predicate]["goals"].push(g)
+                #self.db[i.lh.predicate]["terms"].append(i.terms)
             else:
                 self.db[i.lh.predicate] = {}
-                self.db[i.lh.predicate]["facts"] = [i]
-                self.db[i.lh.predicate]["goals"] = [g]
-                self.db[i.lh.predicate]["terms"] = [i.terms]
+                self.db[i.lh.predicate]["facts"] = FactHeap()
+                self.db[i.lh.predicate]["facts"].push(i)
+                self.db[i.lh.predicate]["goals"] = FactHeap()
+                self.db[i.lh.predicate]["goals"].push(g)
+                self.db[i.lh.predicate]["terms"] = FactHeap()
+                self.db[i.lh.predicate]["terms"].push(i.terms)
+                #self.db[i.lh.predicate]["goals"] = [g]
+                #self.db[i.lh.predicate]["terms"] = [i.terms]
             
     def __call__(self, args):
         self.add_kn(args)

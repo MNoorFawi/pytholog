@@ -18,6 +18,7 @@ class Expr:
         if self.predicate == "": self.terms = re.split(splitting, self.terms)
         else: self.terms = self.terms.split(",")
         self.string = self.f
+        self.index = 0
     
     ## return string value of the expr in case we need it elsewhere with different type
     def to_string(self):
@@ -25,7 +26,12 @@ class Expr:
 
     def __repr__ (self) :
         return self.string
+        
+    def __lt__(self, other):
+        return self.terms[self.index] < other.terms[other.index]
+        
 
+#pl_expr deprecated
 class DeprecationHelper(object):
     def __init__(self, new_target):
         self.new_target = new_target

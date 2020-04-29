@@ -32,3 +32,6 @@ class Fact:
     def __repr__ (self) :
         return self.fact
         
+    def __lt__(self, other):
+        return self.lh.terms[self.lh.index] < other.lh.terms[other.lh.index]
+        
