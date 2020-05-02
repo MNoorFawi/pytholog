@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  
+  
+  <link rel="shortcut icon" href="../img/favicon.ico">
+  <title>Pytholog as a logic database - pytholog</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lato:400,700|Roboto+Slab:400,700|Inconsolata:400,700" />
+
+  <link rel="stylesheet" href="../css/theme.css" />
+  <link rel="stylesheet" href="../css/theme_extra.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css" />
+  
+  <script>
+    // Current page data
+    var mkdocs_page_name = "Pytholog as a logic database";
+    var mkdocs_page_input_path = "pytholog_database.md";
+    var mkdocs_page_url = null;
+  </script>
+  
+  <script src="../js/jquery-2.1.1.min.js" defer></script>
+  <script src="../js/modernizr-2.8.3.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+  <script>hljs.initHighlightingOnLoad();</script> 
+  
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+        <a href=".." class="icon icon-home"> pytholog</a>
+        <div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+                <ul>
+                    <li class="toctree-l1"><a class="reference internal" href="..">Home</a>
+                    </li>
+                </ul>
+                <ul>
+                    <li class="toctree-l1"><a class="reference internal" href="../How%20pytholog%20works/">Logic Programming with Pytholog</a>
+                    </li>
+                </ul>
+                <ul>
+                    <li class="toctree-l1"><a class="reference internal" href="../friends_influence/">Probabilistic Logic</a>
+                    </li>
+                </ul>
+                <ul class="current">
+                    <li class="toctree-l1 current"><a class="reference internal current" href="./">Pytholog as a logic database</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#overview">Overview</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#reading-tables-into-python">Reading tables into python</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#defining-knowledge-base">Defining Knowledge Base</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#rules-as-views">Rules as views</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#film_category">film_category</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#film_actor">film_actor</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#actor_category">actor_category</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#saving-knowledge-base-to-prolog-file">Saving knowledge base to prolog file</a>
+    </li>
+    </ul>
+                    </li>
+                </ul>
+                <ul>
+                    <li class="toctree-l1"><a class="reference internal" href="../pytholog_graph/">Finding paths in graphs</a>
+                    </li>
+                </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="..">pytholog</a>
+      </nav>
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="..">Docs</a> &raquo;</li>
+    
+      
+    
+    <li>Pytholog as a logic database</li>
+    <li class="wy-breadcrumbs-aside">
+      
+    </li>
+  </ul>
+  
+  <hr/>
+</div>
+          <div role="main">
+            <div class="section">
+              
+                <h1 id="pytholog-as-a-logic-database">Pytholog as a logic database</h1>
+<h2 id="overview">Overview</h2>
+<p>We will use <a href="https://www.postgresqltutorial.com/postgresql-sample-database/">DVD Rental</a> database to feed a knowledge base
+as facts and rules, then logically query the database.</p>
+<p><a href="https://github.com/MNoorFawi/neo4j-and-postgresql-with-R">Here</a> we can find how to create the database in postgresql and insert the data.</p>
+<p>Let's connect to the database in python and see how it looks like:</p>
+<pre><code class="python">import psycopg2
+import pandas as pd
+
+psql = psycopg2.connect(host = &quot;localhost&quot;, database = &quot;dvdrental&quot;,
+                      user = &quot;postgres&quot;, password = &quot;password&quot;)
+cursor = psql.cursor()
+## fetch some data to confirm connection
+pd.read_sql(&quot;SELECT * FROM language;&quot;, psql)
+
+#    language_id                  name         last_update
+# 0            1  English              2006-02-15 10:02:19
+# 1            2  Italian              2006-02-15 10:02:19
+# 2            3  Japanese             2006-02-15 10:02:19
+# 3            4  Mandarin             2006-02-15 10:02:19
+# 4            5  French               2006-02-15 10:02:19
+# 5            6  German               2006-02-15 10:02:19
+</code></pre>
+
+<p>Let's see what the table names are:</p>
+<pre><code class="python">cursor.execute(&quot;select relname from pg_class where relkind='r' and relname !~ '^(pg_|sql_)';&quot;)
+print(cursor.fetchall())
+
+# [('actor',), ('store',), ('address',), ('category',), ('city',), ('country',), 
+# ('customer',), ('film_actor',), ('film_category',), ('inventory',), ('language',), 
+# ('rental',), ('staff',), ('payment',), ('film',), ('movies_rental',), ('compressed_movies_rental',)]
+</code></pre>
+
+<pre><code class="python">def query_defn(table):
+    return f&quot;SELECT * FROM {table};&quot;
+</code></pre>
+
+<h2 id="reading-tables-into-python">Reading tables into python</h2>
+<p>No we will read the tables we will query into python and do some transformation to have values in lowercase.</p>
+<pre><code class="python">actor = pd.read_sql(query_defn(&quot;actor&quot;), psql)
+actor[&quot;Actor&quot;] = (actor[&quot;first_name&quot;] + &quot;_&quot; + actor[&quot;last_name&quot;]).str.lower()
+actor.head()
+
+#    actor_id first_name  ...             last_update                Actor
+# 0         1   Penelope  ... 2013-05-26 14:47:57.620     penelope_guiness
+# 1         2       Nick  ... 2013-05-26 14:47:57.620        nick_wahlberg
+# 2         3         Ed  ... 2013-05-26 14:47:57.620             ed_chase
+# 3         4   Jennifer  ... 2013-05-26 14:47:57.620       jennifer_davis
+# 4         5     Johnny  ... 2013-05-26 14:47:57.620  johnny_lollobrigida
+# [5 rows x 5 columns]
+</code></pre>
+
+<pre><code class="python">language = pd.read_sql(query_defn(&quot;language&quot;), psql)
+film = pd.read_sql(query_defn(&quot;film&quot;), psql)
+category = pd.read_sql(query_defn(&quot;category&quot;), psql)
+#customer = pd.read_sql(query_defn(&quot;customer&quot;), psql)
+language[&quot;name&quot;] = language[&quot;name&quot;].str.lower()
+film[&quot;title&quot;] = film[&quot;title&quot;].str.replace(&quot; &quot;, &quot;_&quot;).str.lower()
+category[&quot;name&quot;] = category[&quot;name&quot;].str.lower()
+#customer[&quot;Customer&quot;] = (customer[&quot;first_name&quot;] + &quot;_&quot; + customer[&quot;last_name&quot;]).str.lower()
+film_category = pd.read_sql(query_defn(&quot;film_category&quot;), psql)
+#film[film.film_id.isin(film_category[film_category.category_id == 14].film_id)]
+
+print(film.loc[film.film_id == 1, &quot;title&quot;])
+# 4    academy_dinosaur
+# Name: title, dtype: object
+
+print(actor.head())
+#    actor_id first_name  ...             last_update                Actor
+# 0         1   Penelope  ... 2013-05-26 14:47:57.620     penelope_guiness
+# 1         2       Nick  ... 2013-05-26 14:47:57.620        nick_wahlberg
+# 2         3         Ed  ... 2013-05-26 14:47:57.620             ed_chase
+# 3         4   Jennifer  ... 2013-05-26 14:47:57.620       jennifer_davis
+# 4         5     Johnny  ... 2013-05-26 14:47:57.620  johnny_lollobrigida
+</code></pre>
+
+<h2 id="defining-knowledge-base">Defining Knowledge Base</h2>
+<p><strong>Let's initiate the knowledge base and feed it with for loops.</strong></p>
+<p>We will use rules as the query statements and views if we need some joining and conditions.</p>
+<pre><code class="python">import pytholog as pl
+dvd = pl.KnowledgeBase(&quot;dvd_rental&quot;)
+
+for i in range(film.shape[0]):
+    dvd([f&quot;film({film.film_id[i]}, {film.title[i]}, {film.language_id[i]})&quot;])
+
+for i in range(language.shape[0]):
+    dvd([f&quot;language({language.language_id[i]}, {language.name[i]})&quot;])
+
+## simple query 
+dvd([&quot;film_language(F, L) :- film(_, F, LID), language(LID, L)&quot;])
+dvd.query(pl.Expr(&quot;film_language(young_language, L)&quot;))
+# [{'L': 'english'}]
+</code></pre>
+
+<h2 id="rules-as-views">Rules as views</h2>
+<h3 id="film_category">film_category</h3>
+<p>We will create film_category view</p>
+<pre><code class="python">for i in range(category.shape[0]):
+    dvd([f&quot;category({category.category_id[i]}, {category.name[i]})&quot;])
+
+for i in range(film_category.shape[0]):
+    dvd([f&quot;filmcategory({film_category.film_id[i]}, {film_category.category_id[i]})&quot;])
+
+dvd([&quot;film_category(F, C) :- film(FID, F, _), filmcategory(FID, CID), category(CID, C)&quot;]) ## &quot;_&quot; to neglect this term
+
+## another query to see what films in sci-fi category 
+dvd.query(pl.Expr(&quot;film_category(F, sci-fi)&quot;))
+
+# [{'F': 'annie_identity'},
+#  {'F': 'armageddon_lost'},
+# .....
+
+#  {'F': 'titans_jerk'},
+#  {'F': 'trojan_tomorrow'},
+#  {'F': 'unforgiven_zoolander'},
+#  {'F': 'vacation_boondock'},
+#  {'F': 'weekend_personal'},
+#  {'F': 'whisperer_giant'},
+#  {'F': 'wonderland_christmas'}]
+</code></pre>
+
+<h3 id="film_actor">film_actor</h3>
+<p>Let's join actors and films</p>
+<pre><code class="python">for i in range(actor.shape[0]):
+    dvd([f&quot;actor({actor.actor_id[i]}, {actor.Actor[i]})&quot;])
+
+film_actor = pd.read_sql(query_defn(&quot;film_actor&quot;), psql)
+#print(film_actor[film_actor[&quot;actor_id&quot;] == 3].shape)
+print(film_actor.shape)
+#(5462, 3)
+for i in range(film_actor.shape[0]):
+    dvd([f&quot;filmactor({film_actor.film_id[i]}, {film_actor.actor_id[i]})&quot;])
+
+dvd([&quot;film_actor(F, A) :- film(FID, F, _), filmactor(FID, AID), actor(AID, A)&quot;])
+
+dvd.query(pl.Expr(&quot;film_actor(annie_identity, Actor)&quot;))
+#[{'Actor': 'adam_grant'}, {'Actor': 'cate_mcqueen'}, {'Actor': 'greta_keitel'}]
+
+## query actors in a film
+dvd.query(pl.Expr(&quot;film_actor(academy_dinosaur, Actor)&quot;))
+# [{'Actor': 'penelope_guiness'},
+#  {'Actor': 'christian_gable'},
+#  {'Actor': 'lucille_tracy'},
+#  {'Actor': 'sandra_peck'},
+#  {'Actor': 'johnny_cage'},
+#  {'Actor': 'mena_temple'},
+#  {'Actor': 'warren_nolte'},
+#  {'Actor': 'oprah_kilmer'},
+#  {'Actor': 'rock_dukakis'},
+#  {'Actor': 'mary_keitel'}]
+
+### query films that an actor performed in
+dvd.query(pl.Expr(&quot;film_actor(Film, penelope_guiness)&quot;))
+# [{'Film': 'academy_dinosaur'},
+#  {'Film': 'anaconda_confessions'},
+#  {'Film': 'angels_life'},
+#  {'Film': 'bulworth_commandments'},
+#  {'Film': 'cheaper_clyde'},
+#  {'Film': 'color_philadelphia'},
+#  {'Film': 'elephant_trojan'},
+#  {'Film': 'gleaming_jawbreaker'},
+#  {'Film': 'human_graffiti'},
+#  {'Film': 'king_evolution'},
+#  {'Film': 'lady_stage'},
+#  {'Film': 'language_cowboy'},
+#  {'Film': 'mulholland_beast'},
+#  {'Film': 'oklahoma_jumanji'},
+#  {'Film': 'rules_human'},
+#  {'Film': 'splash_gump'},
+#  {'Film': 'vertigo_northwest'},
+#  {'Film': 'westward_seabiscuit'},
+#  {'Film': 'wizard_coldblooded'}]
+
+### simple yes or no query
+dvd.query(pl.Expr(&quot;film_actor(academy_dinosaur, lucille_tracy)&quot;))
+# ['Yes']
+</code></pre>
+
+<h3 id="actor_category">actor_category</h3>
+<p>Actor Category view to see in which categories an actor performed.</p>
+<pre><code class="python">dvd([&quot;actor_category(A, C) :- film_actor(F, A), film_category(F, C)&quot;])
+
+jd = dvd.query(pl.Expr(&quot;actor_category(jennifer_davis, Category)&quot;))
+
+from pprint import pprint
+merged = {}
+for d in jd:
+    for k, v in d.items():
+        if k not in merged: merged[k] = set()
+        merged[k].add(v)
+
+pprint(merged)
+# {'Category': {'action',
+#               'animation',
+#               'comedy',
+#               'documentary',
+#               'drama',
+#               'family',
+#               'horror',
+#               'music',
+#               'new',
+#               'sci-fi',
+#               'sports',
+#               'travel'}}
+</code></pre>
+
+<h2 id="saving-knowledge-base-to-prolog-file">Saving knowledge base to prolog file</h2>
+<p>Finally, let's now write those facts and rules to a prolog file.</p>
+<pre><code class="python">with open(&quot;dvd_rental.pl&quot;, &quot;w&quot;) as f:
+    for i in dvd.db.keys():
+        for d in dvd.db[i][&quot;facts&quot;]:
+            f.write(d.to_string() + &quot;.&quot; + &quot;\n&quot;)
+
+f.close()
+</code></pre>
+              
+            </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="../pytholog_graph/" class="btn btn-neutral float-right" title="Finding paths in graphs">Next <span class="icon icon-circle-arrow-right"></span></a>
+      
+      
+        <a href="../friends_influence/" class="btn btn-neutral" title="Probabilistic Logic"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+    
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+      
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="versions">
+    <span class="rst-current-version" data-toggle="rst-current-version">
+      
+      
+        <span><a href="../friends_influence/" style="color: #fcfcfc;">&laquo; Previous</a></span>
+      
+      
+        <span style="margin-left: 15px"><a href="../pytholog_graph/" style="color: #fcfcfc">Next &raquo;</a></span>
+      
+    </span>
+</div>
+    <script>var base_url = '..';</script>
+    <script src="../js/theme.js" defer></script>
+      <script src="../search/main.js" defer></script>
+    <script defer>
+        window.onload = function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        };
+    </script>
+
+</body>
+</html>

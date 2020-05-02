@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  
+  
+  <link rel="shortcut icon" href="../img/favicon.ico">
+  <title>Probabilistic Logic - pytholog</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lato:400,700|Roboto+Slab:400,700|Inconsolata:400,700" />
+
+  <link rel="stylesheet" href="../css/theme.css" />
+  <link rel="stylesheet" href="../css/theme_extra.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css" />
+  
+  <script>
+    // Current page data
+    var mkdocs_page_name = "Probabilistic Logic";
+    var mkdocs_page_input_path = "friends_influence.md";
+    var mkdocs_page_url = null;
+  </script>
+  
+  <script src="../js/jquery-2.1.1.min.js" defer></script>
+  <script src="../js/modernizr-2.8.3.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+  <script>hljs.initHighlightingOnLoad();</script> 
+  
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+        <a href=".." class="icon icon-home"> pytholog</a>
+        <div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+                <ul>
+                    <li class="toctree-l1"><a class="reference internal" href="..">Home</a>
+                    </li>
+                </ul>
+                <ul>
+                    <li class="toctree-l1"><a class="reference internal" href="../How%20pytholog%20works/">Logic Programming with Pytholog</a>
+                    </li>
+                </ul>
+                <ul class="current">
+                    <li class="toctree-l1 current"><a class="reference internal current" href="./">Probabilistic Logic</a>
+    <ul class="current">
+    </ul>
+                    </li>
+                </ul>
+                <ul>
+                    <li class="toctree-l1"><a class="reference internal" href="../pytholog_database/">Pytholog as a logic database</a>
+                    </li>
+                </ul>
+                <ul>
+                    <li class="toctree-l1"><a class="reference internal" href="../pytholog_graph/">Finding paths in graphs</a>
+                    </li>
+                </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="..">pytholog</a>
+      </nav>
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="..">Docs</a> &raquo;</li>
+    
+      
+    
+    <li>Probabilistic Logic</li>
+    <li class="wy-breadcrumbs-aside">
+      
+    </li>
+  </ul>
+  
+  <hr/>
+</div>
+          <div role="main">
+            <div class="section">
+              
+                <h1 id="probabilistic-logic">Probabilistic Logic</h1>
+<p><strong>How friends can influence each other into smoking based on some other factors.</strong></p>
+<p>The example is inspired by <a href="https://dtai.cs.kuleuven.be/problog/tutorial/basic/05_smokers.html">problog</a></p>
+<p>Here how we can define the knowledge base in <strong>Prolog</strong>:</p>
+<pre><code class="prolog">stress(X, P) :- has_lot_work(X, P2), P is P2 * 0.2.
+to_smoke(X, Prob) :- stress(X, P1), friends(Y, X), influences(Y, X, P2), smokes(Y), Prob is P1 * P2.
+to_have_asthma(X, 0.4) :- smokes(X).
+to_have_asthma(X, Prob) :- to_smoke(X, P2), Prob is P2 * 0.25.
+friends(X, Y) :- friend(X, Y).
+friends(X, Y) :- friend(Y, X).
+influences(X, Y, 0.6) :- friends(X, Y).
+friend(peter, david).
+friend(peter, rebecca).
+friend(daniel, rebecca).
+smokes(peter).
+smokes(rebecca).
+has_lot_work(daniel, 0.8).
+has_lot_work(david, 0.3).
+</code></pre>
+
+<p>So much similar in <strong>python</strong> with <strong>pytholog</strong>:</p>
+<pre><code class="python">friends_kb = pl.KnowledgeBase(&quot;friends&quot;)
+friends_kb([
+    &quot;stress(X, P) :- has_lot_work(X, P2), P is P2 * 0.2&quot;,
+    &quot;to_smoke(X, Prob) :- stress(X, P1), friends(Y, X), influences(Y, X, P2), smokes(Y), Prob is P1 * P2&quot;,
+    &quot;to_have_asthma(X, 0.4) :- smokes(X)&quot;,
+    &quot;to_have_asthma(X, Prob) :- to_smoke(X, P2), Prob is P2 * 0.25&quot;,
+    &quot;friends(X, Y) :- friend(X, Y)&quot;,
+    &quot;friends(X, Y) :- friend(Y, X)&quot;,
+    &quot;influences(X, Y, 0.6) :- friends(X, Y)&quot;,
+    &quot;friend(peter, david)&quot;,
+    &quot;friend(peter, rebecca)&quot;,
+    &quot;friend(daniel, rebecca)&quot;,
+    &quot;smokes(peter)&quot;,
+    &quot;smokes(rebecca)&quot;,
+    &quot;has_lot_work(daniel, 0.8)&quot;,
+    &quot;has_lot_work(david, 0.3)&quot;
+])
+</code></pre>
+
+<p>Let's now perform some queries in both languages:
+Prolog:</p>
+<pre><code class="prolog">influences(X, rebecca, P).
+% P = 0.59999999999999998
+% X = peter ? ;
+% P = 0.59999999999999998
+% X = daniel ? ;
+
+smokes(Who).
+% Who = peter ? ;
+% Who = rebecca ;
+
+to_smoke(Who, P).
+% P = 0.096000000000000016
+% Who = daniel ? ;
+% P = 0.035999999999999997
+% Who = david ? ;
+
+to_have_asthma(Who, P).
+% P = 0.40000000000000002
+% Who = peter ? ;
+% P = 0.40000000000000002
+% Who = rebecca ? ;
+% P = 0.024000000000000004
+% Who = daniel ? ;
+% P = 0.0089999999999999993
+% Who = david ? ;
+</code></pre>
+
+<p>Python:</p>
+<pre><code class="python">friends_kb.query(pl.Expr(&quot;influences(X, rebecca, P)&quot;))
+# [{'X': 'peter', 'P': '0.6'}, {'X': 'daniel', 'P': '0.6'}]
+
+friends_kb.query(pl.Expr(&quot;smokes(Who)&quot;))
+# [{'Who': 'peter'}, {'Who': 'rebecca'}]
+
+friends_kb.query(pl.Expr(&quot;to_smoke(Who, P)&quot;))
+# [{'Who': 'daniel', 'P': 0.09600000000000002}, {'Who': 'david', 'P': 0.036}]
+
+friends_kb.query(pl.Expr(&quot;to_have_asthma(Who, P)&quot;))
+# [{'Who': 'peter', 'P': '0.4'},
+#  {'Who': 'rebecca', 'P': '0.4'},
+#  {'Who': 'daniel', 'P': 0.024000000000000004},
+#  {'Who': 'david', 'P': 0.009}]
+</code></pre>
+
+<p>The two languages are performing the same way and giving the same results! :D
+This is the purpose of pytholog, to mimic the way prolog behaves inside python.</p>
+              
+            </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="../pytholog_database/" class="btn btn-neutral float-right" title="Pytholog as a logic database">Next <span class="icon icon-circle-arrow-right"></span></a>
+      
+      
+        <a href="../How%20pytholog%20works/" class="btn btn-neutral" title="Logic Programming with Pytholog"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+    
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+      
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="versions">
+    <span class="rst-current-version" data-toggle="rst-current-version">
+      
+      
+        <span><a href="../How%20pytholog%20works/" style="color: #fcfcfc;">&laquo; Previous</a></span>
+      
+      
+        <span style="margin-left: 15px"><a href="../pytholog_database/" style="color: #fcfcfc">Next &raquo;</a></span>
+      
+    </span>
+</div>
+    <script>var base_url = '..';</script>
+    <script src="../js/theme.js" defer></script>
+      <script src="../search/main.js" defer></script>
+    <script defer>
+        window.onload = function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        };
+    </script>
+
+</body>
+</html>
