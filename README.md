@@ -3,6 +3,7 @@ pytholog
 
 ## Write Prolog in Python
 
+[![](https://img.shields.io/badge/docs-latest-blue.svg)](https://mnoorfawi.github.io/pytholog/) 
 [![Build Status](https://travis-ci.com/MNoorFawi/pytholog.svg?branch=master)](https://travis-ci.com/MNoorFawi/pytholog)
 
 Python library that enables using **logic programming** in python. 
