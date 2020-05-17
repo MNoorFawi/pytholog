@@ -19,9 +19,10 @@ def test_dishes():
         "flavor(sweet, juice)",
         "food_flavor(X, Y) :- food_type(X, Z), flavor(Y, Z)",
         "dish_to_like(X, Y) :- likes(X, L), food_type(L, T), flavor(F, T), food_flavor(Y, F)"])
-    assert food_kb.query(pl.Expr("likes(noor, sausage)"))
-    assert food_kb.query(pl.Expr("food_flavor(What, sweet)"))
-    assert food_kb.query(pl.Expr("dish_to_like(noor, What)"))
+    assert food_kb.query(pl.Expr("likes(noor, sausage)")) == ["Yes"]
+    answer = {"What": "cookie"}
+    query = food_kb.query(pl.Expr("food_flavor(What, sweet)"))
+    assert answer in query
     
 def test_friends():
     friends_kb = pl.KnowledgeBase("friends")
@@ -41,10 +42,10 @@ def test_friends():
         "smokes(rebecca)",
         "has_lot_work(daniel, 0.8)",
         "has_lot_work(david, 0.3)"])
-    assert friends_kb.query(pl.Expr("influences(X, rebecca, P)"))
-    assert friends_kb.query(pl.Expr("smokes(Who)"))
-    assert friends_kb.query(pl.Expr("to_smoke(Who, P)"))
-    assert friends_kb.query(pl.Expr("to_have_asthma(Who, P)"))
+    david = {'Who': 'david', 'P': 0.036}
+    assert david in friends_kb.query(pl.Expr("to_smoke(Who, P)"))
+    dan_reb = [{'Who': 'rebecca', 'P': '0.4'}, {'Who': 'daniel', 'P': 0.024000000000000004}]
+    assert all(i in friends_kb.query(pl.Expr("to_have_asthma(Who, P)")) for i in dan_reb)
     
 def test_iris():
     iris_kb = pl.KnowledgeBase("iris")
@@ -53,7 +54,10 @@ def test_iris():
              "species(virginica, Truth) :- petal_width(W), petal_length(L), Truth is W > 0.80 and L > 4.95",
              "petal_length(5.1)",
              "petal_width(2.4)"])
-    assert iris_kb.query(pl.Expr("species(Class, Truth)"))         
+    query = iris_kb.query(pl.Expr("species(Class, Truth)"))
+    answer = list(filter(lambda d: d['Truth'] == "Yes", query))[0]
+    correct_answer = {'Class': 'virginica', 'Truth': 'Yes'}
+    assert answer == correct_answer
 
 def test_graph():
     graph = pl.KnowledgeBase("graph")
@@ -63,6 +67,6 @@ def test_graph():
            "path(X, Y, W) :- edge(X , Y, W)",
            "path(X, Y, W) :- edge(X, Z, W1), path(Z, Y, W2), W is W1 + W2"])
 
-    assert graph.query(pl.Expr("path(a, f, W)"), show_path = True)
-    assert graph.query(pl.Expr("path(a, e, W)"), show_path = True, cut = True)
+    query = graph.query(pl.Expr("path(a, e, W)"), cut = True)
+    assert [d.get("W") for d in query][0] == 10
     
