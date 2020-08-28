@@ -14,7 +14,7 @@ Now pytholog supports probabilities.
 Pytholog gives facts indices (first term) and uses **binary search** to search for relevant facts instead of looping over all knowledge base.
 So when defining rules, **make sure that the main search terms are in the first position to speed up the search queries.**
 
-#### Full documentation is available [here](https://mnoorfawi.github.io/pytholog/)
+## Full documentation is available [here](https://mnoorfawi.github.io/pytholog/)
 
 ###### OR can be implemented with defining the rules as many times as the OR facts. For example, to say "fly(X) :- bird(X) ; wings(X)." can be defined as two rules as follows: "fly(X) :- bird(X)." and "fly(X) :- wings(X)."
 
