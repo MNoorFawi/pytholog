@@ -28,6 +28,3 @@ def unify(lh, rh, lh_domain = None, rh_domain = None):
     
     return True
     
-
-        
-        
