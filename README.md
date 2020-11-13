@@ -17,7 +17,9 @@ So when defining rules, **make sure that the main search terms are in the first 
 
 ## Full documentation is available [here](https://mnoorfawi.github.io/pytholog/)
 
-###### OR can be implemented with defining the rules as many times as the OR facts. For example, to say "fly(X) :- bird(X) ; wings(X)." can be defined as two rules as follows: "fly(X) :- bird(X)." and "fly(X) :- wings(X)."
+There is a SourceForge project, available here: https://sourceforge.net/projects/pytholog/, that has an executable tool that works as a standalone **logical database** with a **RESTful API** that can be queried by and used with other applications. 
+
+The tools in the project work in Linux and Windows and there is also the script to be built on OSX system.
 
 #### prolog syntax
 
@@ -49,6 +51,8 @@ I loved prolog and the idea of Symbolic Intelligence. So I decided to
 build a module or a framework in python that can allow me to use prolog
 inside python aiming to combine the power of machine learning and
 symbolic reasoning.
+
+###### OR can be implemented with defining the rules as many times as the OR facts. For example, to say "fly(X) :- bird(X) ; wings(X)." can be defined as two rules as follows: "fly(X) :- bird(X)." and "fly(X) :- wings(X)."
 
 #### pytholog Implementation
 
