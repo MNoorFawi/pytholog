@@ -116,20 +116,20 @@ def run(kb):
             switch.get(inpt, invalid_inpt)(kb)
             continue
 
-@app.route("/query", methods=["GET", "POST"])
+@app.route("/query", methods=["GET"])
 def kb_query():
     inpt = request.args["expr"]
     inpt = inpt_prep(inpt)
     return jsonify(_query(kb, inpt))
     
-@app.route("/insert")#, methods=["GET", "POST"])
+@app.route("/insert")#, methods=["GET"])
 def kb_insert():
     inpt = request.args["expr"]
     input = inpt_prep(inpt)
     _insert(kb, inpt)
     return jsonify("OK")
     
-@app.route("/save")#, methods=["GET", "POST"])
+@app.route("/save")#, methods=["GET"])
 def kb_save():
     return jsonify(save_quit(kb, exit = False))
 
