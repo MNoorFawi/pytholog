@@ -1,7 +1,8 @@
 pytholog
 ================
 
-## Write Prolog in Python
+![](./pytholog_files/figure-gfm/pytholog-logo.png)
+## Logic programming in Python
 
 [![](https://img.shields.io/badge/docs-latest-blue.svg)](https://mnoorfawi.github.io/pytholog/) 
 [![Build Status](https://travis-ci.com/MNoorFawi/pytholog.svg?branch=master)](https://travis-ci.com/MNoorFawi/pytholog)
@@ -20,7 +21,7 @@ So when defining rules, **make sure that the main search terms are in the first 
 
 #### prolog syntax
 
-![](/pytholog_files/figure-gfm/prolog_ex.png)
+![](./pytholog_files/figure-gfm/prolog_ex.png)
 
 Prolog takes facts and rules. A fact or a rule has a predicate which in
 “likes(noor, sausage)” is “likes” and in “friend(X, Y)” is “friend”.
@@ -153,7 +154,7 @@ print(time() - start)
 
 ##### City Coloring problem
 
-![](/pytholog_files/figure-gfm/city_color.png)
+![](./pytholog_files/figure-gfm/city_color.png)
 
 ###### Image Source: [Seven Languages in Seven Weeks book](https://pragprog.com/book/btlang/seven-languages-in-seven-weeks)
 
@@ -287,7 +288,7 @@ ex.db
 ### Graph Traversals with Pytholog
 Let's define a weighted directed graph and see if we can get a path, hopefully the shortest, between two nodes using breadth first search.
 
-![](/pytholog_files/figure-gfm/graph.png)
+![](./pytholog_files/figure-gfm/graph.png)
 
 ###### [Image source](https://dtai.cs.kuleuven.be/problog/tutorial/basic/04_pgraph.html)
 
