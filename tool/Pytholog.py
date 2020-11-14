@@ -122,14 +122,14 @@ def kb_query():
     inpt = inpt_prep(inpt)
     return jsonify(_query(kb, inpt))
     
-@app.route("/insert")#, methods=["GET"])
+@app.route("/insert", methods=["POST"])
 def kb_insert():
     inpt = request.args["expr"]
     input = inpt_prep(inpt)
     _insert(kb, inpt)
     return jsonify("OK")
     
-@app.route("/save")#, methods=["GET"])
+@app.route("/save", methods=["GET", "POST"])
 def kb_save():
     return jsonify(save_quit(kb, exit = False))
 
