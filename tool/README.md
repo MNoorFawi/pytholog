@@ -110,7 +110,7 @@ GET("http://127.0.0.1:5000/query?expr=food_flavor(What,savory)")
 From Command line
 
 ```bash
-$ $ curl -s "http://127.0.0.1:5000/insert?expr=dish_to_like(X,Y):-likes(X,L),food_type(L,T),flavor(F,T),food_flavor(Y,F)"
+$ curl -s -X POST "http://127.0.0.1:5000/insert?expr=dish_to_like(X,Y):-likes(X,L),food_type(L,T),flavor(F,T),food_flavor(Y,F)"
 "OK"
 ``` 
 
