@@ -97,3 +97,11 @@ def fact_binary_search(facts, key):
             
     return left, right #- 1
     
+def filter_eq(rule, currentgoal, Q):
+    # apply inequality check
+    currentgoal.domain = {k:v for k,v in currentgoal.domain.items() if currentgoal.domain[rule.terms[0]] != currentgoal.domain[rule.terms[1]]}
+
+    prob_child = Goal(Fact(rule.to_string()),
+                      parent = currentgoal,
+                      domain = currentgoal.domain)
+    Q.push(prob_child)

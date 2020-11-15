@@ -1,4 +1,4 @@
-from .util import term_checker, get_path, prob_parser, is_number, is_variable
+from .util import term_checker, get_path, prob_parser, is_number, is_variable, answer_handler
 from .fact import Fact
 from .expr import Expr
 from .goal import Goal
@@ -114,6 +114,11 @@ def rule_query(kb, expr, cut, show_path):
         if rule.predicate == "": ## if there is no predicate
             prob_calc(current_goal, rule, queue)
             continue
+        
+        # inequality
+        if rule.predicate == "neq":
+            filter_eq(rule, current_goal, queue)
+            continue
             
         elif rule.predicate in kb.db:
             ## search relevant buckets so it speeds up search
@@ -124,9 +129,9 @@ def rule_query(kb, expr, cut, show_path):
             else:
                 # a child to search facts in kb
                 child_assigned(rule, rule_f, current_goal, queue)
-                
-    if len(answer) == 0: answer.append("No")  ## if no answers at all return "No"  
-                         
+    
+    answer = answer_handler(answer)
+    
     if show_path: 
         path = get_path(kb.db, expr, path)
         return answer, path

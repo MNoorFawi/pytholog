@@ -99,3 +99,16 @@ def lh_eval(rh_val, lh_arg, lh_domain):
             return False          
     elif lh_arg != rh_val: 
         return False
+
+def answer_handler(answer):
+    if len(answer) == 0: 
+        answer.append("No")  ## if no answers at all return "No" 
+        return answer
+    
+    elif len(answer) > 1:
+        if any(ans != "Yes" for ans in answer):
+            answer = [i for i in answer if i != "Yes"]
+        elif all(ans == "Yes" for ans in answer):
+            return answer_handler([])
+            
+    return answer
