@@ -108,6 +108,7 @@
             <div class="section">
               
                 <h1 id="pytholog-write-prolog-in-python">pytholog (Write Prolog in Python)</h1>
+<p><img alt="pytholog logo" src="img/pytholog-logo.png" /></p>
 <p><a href="https://travis-ci.com/MNoorFawi/pytholog"><img alt="Build Status" src="https://travis-ci.com/MNoorFawi/pytholog.svg?branch=master" /></a></p>
 <h2 id="overview">Overview</h2>
 <p>Python library that enables using <strong>logic programming</strong> in python. 
@@ -115,9 +116,10 @@ The aim of the library is to explore ways to use symbolic reasoning with machine
 <p>Pytholog supports probabilities.</p>
 <p>Pytholog gives facts indices (first term) and uses <strong>binary search</strong> to search for relevant facts instead of looping over all knowledge base.
 So when defining rules, <strong>make sure that the main search terms are in the first position to speed up the search queries.</strong></p>
-<p>OR can be implemented with defining the rules as many times as the OR facts. For example, to say "fly(X) :- bird(X) ; wings(X)." can be defined as two rules as follows: "fly(X) :- bird(X)." and "fly(X) :- wings(X)."</p>
+<p>There is a SourceForge project, available here: https://sourceforge.net/projects/pytholog/, that has an executable tool that works as a standalone <strong>logical database</strong> with a <strong>RESTful API</strong> that can be queried by and used with other applications. </p>
+<p>The tools in the project work in Linux and Windows and there is also the script to be built on OSX system.</p>
 <h4 id="prolog-syntax">prolog syntax</h4>
-<p><img alt="" src="./img/prolog_ex.png" /></p>
+<p><img alt="" src="/img/prolog_ex.png" /></p>
 <p>Prolog takes facts and rules. A fact or a rule has a predicate which in
 “likes(noor, sausage)” is “likes” and in “friend(X, Y)” is “friend”.
 Rules have “Left Hand Side (LHS)” which has a predicate and “Right Hand
@@ -194,5 +196,5 @@ symbolic reasoning.</p>
 
 <!--
 MkDocs version : 1.1
-Build Date UTC : 2020-05-02 18:52:05
+Build Date UTC : 2020-11-16 03:15:40
 -->

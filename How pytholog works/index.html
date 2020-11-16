@@ -61,6 +61,10 @@
     <li class="toctree-l2"><a class="reference internal" href="#nested-rules">Nested rules</a>
     </li>
     <li class="toctree-l2"><a class="reference internal" href="#constraint-satisfaction-problem">Constraint Satisfaction Problem</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#image-source-seven-languages-in-seven-weeks-book">Image source: Seven Languages in Seven Weeks Book</a>
+    </li>
+        </ul>
     </li>
     <li class="toctree-l2"><a class="reference internal" href="#probabilistic-logic">Probabilistic Logic</a>
     </li>
@@ -69,6 +73,10 @@
     <li class="toctree-l2"><a class="reference internal" href="#helper-functions">Helper Functions</a>
     </li>
     <li class="toctree-l2"><a class="reference internal" href="#graph-traversals-with-pytholog">Graph Traversals with Pytholog</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#image-source">Image Source</a>
+    </li>
+        </ul>
     </li>
     </ul>
                     </li>
@@ -144,9 +152,11 @@ new_kb([&quot;likes(noor, sausage)&quot;,
         &quot;flavor(savory, cheese)&quot;,
         &quot;flavor(sweet, juice)&quot;,
         &quot;food_flavor(X, Y) :- food_type(X, Z), flavor(Y, Z)&quot;,
-        &quot;dish_to_like(X, Y) :- likes(X, L), food_type(L, T), flavor(F, T), food_flavor(Y, F)&quot;])
+        &quot;dish_to_like(X, Y) :- likes(X, L), food_type(L, T), flavor(F, T), food_flavor(Y, F), neq(L, Y)&quot;])
 </code></pre>
 
+<p>Note that <strong>neq()</strong> is pytholog's way to apply <strong>inequality</strong> so here "neq(L, Y)" means L != Y meaning that we look for new dishes not the one already liked by the person in the query.</p>
+<p>OR can be implemented with defining the rules as many times as the OR facts. For example, to say "fly(X) :- bird(X) ; wings(X)." can be defined as two rules as follows: "fly(X) :- bird(X)." and "fly(X) :- wings(X)."</p>
 <p>Let’s do some queries in this database using its facts and rules.</p>
 <pre><code class="python">new_kb.query(pl.Expr(&quot;likes(noor, sausage)&quot;))
 # ['Yes']
@@ -190,7 +200,7 @@ persons based on taste preferences.</p>
 print(new_kb.query(pl.Expr(&quot;dish_to_like(noor, What)&quot;)))
 print(time() - start)
 
-# [{'What': 'gouda'}, {'What': 'steak'}, {'What': 'sausage'}]
+# [{'What': 'gouda'}, {'What': 'steak'}]
 # 0.001992940902709961
 </code></pre>
 
@@ -199,12 +209,14 @@ print(time() - start)
 print(new_kb.query(pl.Expr(&quot;dish_to_like(noor, What)&quot;)))
 print(time() - start)
 
-# [{'What': 'gouda'}, {'What': 'steak'}, {'What': 'sausage'}]
+# [{'What': 'gouda'}, {'What': 'steak'}]
 # 0.0
 </code></pre>
 
 <h2 id="constraint-satisfaction-problem">Constraint Satisfaction Problem</h2>
 <p><strong>City Coloring problem</strong></p>
+<p><img alt="city color" src="/img/city_color.png" /></p>
+<h6 id="image-source-seven-languages-in-seven-weeks-book">Image source: <a href="https://pragprog.com/titles/btlang/seven-languages-in-seven-weeks/">Seven Languages in Seven Weeks Book</a></h6>
 <p>The problem is <strong>Constraint Satisfaction Problem</strong>. The problem is to
 color each city using only three colors but no adjacent cities can be
 colored the same. The problem might seem so easy but it’s really
@@ -320,6 +332,8 @@ ex.db
 
 <h2 id="graph-traversals-with-pytholog">Graph Traversals with Pytholog</h2>
 <p>Let's define a weighted directed graph and see if we can get a path, hopefully the shortest, between two nodes using breadth first search.</p>
+<p><img alt="graph" src="/img/graph.png" /></p>
+<h6 id="image-source"><a href="https://dtai.cs.kuleuven.be/problog/tutorial/basic/04_pgraph.html">Image Source</a></h6>
 <pre><code class="python">graph = pl.KnowledgeBase(&quot;graph&quot;)
 graph([
     &quot;edge(a, b, 6)&quot;, &quot;edge(a, c, 1)&quot;, &quot;edge(b, e, 4)&quot;,
