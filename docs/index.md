@@ -1,5 +1,6 @@
 pytholog (Write Prolog in Python)
 ================
+![pytholog logo](./img/pytholog-logo.png)
 
 [![Build Status](https://travis-ci.com/MNoorFawi/pytholog.svg?branch=master)](https://travis-ci.com/MNoorFawi/pytholog)
 
@@ -13,11 +14,13 @@ Pytholog supports probabilities.
 Pytholog gives facts indices (first term) and uses **binary search** to search for relevant facts instead of looping over all knowledge base.
 So when defining rules, **make sure that the main search terms are in the first position to speed up the search queries.**
 
-OR can be implemented with defining the rules as many times as the OR facts. For example, to say "fly(X) :- bird(X) ; wings(X)." can be defined as two rules as follows: "fly(X) :- bird(X)." and "fly(X) :- wings(X)."
 
+There is a SourceForge project, available here: https://sourceforge.net/projects/pytholog/, that has an executable tool that works as a standalone **logical database** with a **RESTful API** that can be queried by and used with other applications. 
+
+The tools in the project work in Linux and Windows and there is also the script to be built on OSX system.
 
 #### prolog syntax
-![](/img/prolog_ex.png)
+![](./img/prolog_ex.png)
 
 Prolog takes facts and rules. A fact or a rule has a predicate which in
 “likes(noor, sausage)” is “likes” and in “friend(X, Y)” is “friend”.

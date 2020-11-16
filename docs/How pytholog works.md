@@ -34,6 +34,9 @@ new_kb(["likes(noor, sausage)",
         "food_flavor(X, Y) :- food_type(X, Z), flavor(Y, Z)",
         "dish_to_like(X, Y) :- likes(X, L), food_type(L, T), flavor(F, T), food_flavor(Y, F), neq(L, Y)"])
 ```
+Note that **neq()** is pytholog's way to apply **inequality** so here "neq(L, Y)" means L != Y meaning that we look for new dishes not the one already liked by the person in the query.
+
+OR can be implemented with defining the rules as many times as the OR facts. For example, to say "fly(X) :- bird(X) ; wings(X)." can be defined as two rules as follows: "fly(X) :- bird(X)." and "fly(X) :- wings(X)."
 
 Let’s do some queries in this database using its facts and rules.
 
@@ -109,6 +112,10 @@ print(time() - start)
 ## Constraint Satisfaction Problem
 
 **City Coloring problem**
+
+![city color](./img/city_color.png)
+
+###### Image source: [Seven Languages in Seven Weeks Book](https://pragprog.com/titles/btlang/seven-languages-in-seven-weeks/)
 
 The problem is **Constraint Satisfaction Problem**. The problem is to
 color each city using only three colors but no adjacent cities can be
@@ -245,6 +252,10 @@ ex.db
 
 ## Graph Traversals with Pytholog
 Let's define a weighted directed graph and see if we can get a path, hopefully the shortest, between two nodes using breadth first search.
+
+![graph](./img/graph.png)
+
+###### [Image Source](https://dtai.cs.kuleuven.be/problog/tutorial/basic/04_pgraph.html)
 
 ```python
 graph = pl.KnowledgeBase("graph")
