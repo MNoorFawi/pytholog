@@ -8,6 +8,8 @@ I am actually looking for contributors because I believe working in a team make 
 When contributing to this repository, if possible but not required, please first let's discuss together the change you wish to make 
 via issue, email, or any other method you prefer. I would like to learn from you. 
 
+There is still a lot to do to enhance the library and a lot to be adopted from prolog like the **list processing and operations**. 
+
 ## When creating a Pull Request please:
 
 1. Update the README.md with some explanation about the changes or fixes you made and/or added.

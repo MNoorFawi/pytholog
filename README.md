@@ -86,8 +86,9 @@ new_kb(["likes(noor, sausage)",
         "flavor(savory, cheese)",
         "flavor(sweet, juice)",
         "food_flavor(X, Y) :- food_type(X, Z), flavor(Y, Z)",
-        "dish_to_like(X, Y) :- likes(X, L), food_type(L, T), flavor(F, T), food_flavor(Y, F)"])
+        "dish_to_like(X, Y) :- likes(X, L), food_type(L, T), flavor(F, T), food_flavor(Y, F), neq(L, Y)"])
 ```
+Note that **neq()** is pytholog's way to apply **inequality** so here "neq(L, Y)" means L != Y meaning that we look for new dishes not the one already liked by the person in the query.
 
 Let’s do some queries in this database using its facts and rules.
 
@@ -141,9 +142,10 @@ start = time()
 print(new_kb.query(pl.Expr("dish_to_like(noor, What)")))
 print(time() - start)
 
-# [{'What': 'gouda'}, {'What': 'steak'}, {'What': 'sausage'}]
+# [{'What': 'gouda'}, {'What': 'steak'}]
 # 0.001992940902709961
 ```
+New dishes were recommended!!
 
 Let’s test the Memoization again:
 
@@ -152,7 +154,7 @@ start = time()
 print(new_kb.query(pl.Expr("dish_to_like(noor, What)")))
 print(time() - start)
 
-# [{'What': 'gouda'}, {'What': 'steak'}, {'What': 'sausage'}]
+# [{'What': 'gouda'}, {'What': 'steak'}]
 # 0.0
 ```
 
