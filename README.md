@@ -6,6 +6,7 @@ pytholog
 
 [![](https://img.shields.io/badge/docs-latest-blue.svg)](https://mnoorfawi.github.io/pytholog/) 
 [![Build Status](https://travis-ci.com/MNoorFawi/pytholog.svg?branch=master)](https://travis-ci.com/MNoorFawi/pytholog)
+[![Downloads](https://static.pepy.tech/personalized-badge/pytholog?period=total&units=international_system&left_color=grey&right_color=yellowgreen&left_text=Downloads)](https://pepy.tech/project/pytholog)
 
 Python library that enables using **logic programming** in python. 
 The aim of the library is to explore ways to use symbolic reasoning with machine learning.
