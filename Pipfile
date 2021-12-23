@@ -6,7 +6,6 @@ verify_ssl = true
 [dev-packages]
 pytest = ">=3.7"
 twine = "*"
-urllib3 = ">=1.26.5"
 
 [packages]
 pytholog = {editable = true,path = "."}
