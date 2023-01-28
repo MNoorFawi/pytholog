@@ -34,8 +34,11 @@ class KnowledgeBase(object):
                 self.db[i.lh.predicate]["facts"].push(i)
                 self.db[i.lh.predicate]["terms"].push(i.terms)
                 self.db[i.lh.predicate]["goals"].push(g)
-                #self.db[i.lh.predicate]["terms"].append(i.terms)
+                # self.db[i.lh.predicate]["terms"].append(i.terms)
+                indx, look_up = term_checker(Expr(i.to_string()))
+                del self._cache[look_up]
             else:
+                # initialize the knowledge base
                 self.db[i.lh.predicate] = {}
                 self.db[i.lh.predicate]["facts"] = FactHeap()
                 self.db[i.lh.predicate]["facts"].push(i)
